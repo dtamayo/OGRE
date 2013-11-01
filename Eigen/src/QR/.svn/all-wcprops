@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/QR
+END
+ColPivHouseholderQR.h
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/QR/ColPivHouseholderQR.h
+END
+ColPivHouseholderQR_MKL.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/QR/ColPivHouseholderQR_MKL.h
+END
+HouseholderQR.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/QR/HouseholderQR.h
+END
+FullPivHouseholderQR.h
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/QR/FullPivHouseholderQR.h
+END
+HouseholderQR_MKL.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/QR/HouseholderQR_MKL.h
+END

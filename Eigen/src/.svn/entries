@@ -1,0 +1,94 @@
+10
+
+dir
+52
+https://subversion.assembla.com/svn/orbitframework/branches/OrbitVisualizer/Eigen/src
+https://subversion.assembla.com/svn/orbitframework
+
+
+
+2013-08-07T02:53:13.806792Z
+32
+Bosh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+de147789-5a24-41ac-b794-196dce48c629
+
+LU
+dir
+
+Cholesky
+dir
+
+Householder
+dir
+
+plugins
+dir
+
+QR
+dir
+
+CholmodSupport
+dir
+
+UmfPackSupport
+dir
+
+Jacobi
+dir
+
+Core
+dir
+
+Geometry
+dir
+
+misc
+dir
+
+SVD
+dir
+
+SuperLUSupport
+dir
+
+OrderingMethods
+dir
+
+PardisoSupport
+dir
+
+SparseCholesky
+dir
+
+StlSupport
+dir
+
+PaStiXSupport
+dir
+
+IterativeLinearSolvers
+dir
+
+Eigen2Support
+dir
+
+SparseCore
+dir
+
+Eigenvalues
+dir
+

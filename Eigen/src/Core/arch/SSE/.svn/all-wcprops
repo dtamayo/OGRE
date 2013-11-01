@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/Core/arch/SSE
+END
+PacketMath.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/Core/arch/SSE/PacketMath.h
+END
+MathFunctions.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/Core/arch/SSE/MathFunctions.h
+END
+Complex.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/Core/arch/SSE/Complex.h
+END

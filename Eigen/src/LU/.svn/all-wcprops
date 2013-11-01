@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/LU
+END
+Determinant.h
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/LU/Determinant.h
+END
+Inverse.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/LU/Inverse.h
+END
+PartialPivLU.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/LU/PartialPivLU.h
+END
+PartialPivLU_MKL.h
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/LU/PartialPivLU_MKL.h
+END
+FullPivLU.h
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/orbitframework/!svn/ver/32/branches/OrbitVisualizer/Eigen/src/LU/FullPivLU.h
+END
