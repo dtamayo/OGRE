@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs
+END
+mpbswap.h
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/mpbswap.h
+END
+mpc_info.h
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/mpc_info.h
+END
+vf.h
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/vf.h
+END
+mp_image.h
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/mp_image.h
+END
+vfcap.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/vfcap.h
+END
+cpudetect.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/cpudetect.h
+END
+pullup.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/pullup.h
+END
+mp_msg.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/mp_msg.h
+END
+vf_scale.h
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/vf_scale.h
+END
+help_mp.h
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/help_mp.h
+END
+img_format.h
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/img_format.h
+END
+av_helpers.h
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavfilter/libmpcodecs/av_helpers.h
+END

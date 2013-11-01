@@ -1,0 +1,847 @@
+/*!
+* @file OrbitalAnimator.cpp
+* @brief Implementation of class that displays the orbits.  Extends QGLWidget. Instantiated by OrbitalAnimationDriver. Instantiates settingsDialog.*
+*/
+
+#include "OrbitalAnimator.h"
+
+#define COORD_X 0
+#define COORD_Y 1
+#define COORD_Z 2
+#define W 3
+#define OMEGA 4
+#define I 5
+
+namespace Disp
+{
+    /*! @brief Constructor for the OrbitalAnimator
+
+        The OrbitalAnimator extends QGLWidget.
+        The constructor initializes default values and prepares the arrays cosfs and sinfs.
+    */
+    OrbitalAnimator::OrbitalAnimator(OrbitalAnimatorSettings& settings_, QWidget *parent/* = 0*/)
+        : QGLWidget(parent)
+        , simulationDataLoaded(false)
+        , equatorialDataLoaded(false)
+        , eclipticDataLoaded(false)
+        , settings(settings_)
+        , currentIndex(0)
+        , simulationSize(0)
+        , scaleFactor(1)
+        , xrotation(0)
+        , yrotation(0)
+        , zrotation(0)
+        , centralBody(20, 20, 0)
+        , loading(false)
+        , recording(false)
+        , pictureNumber(0)
+        , trailLength(60)
+        , drawFullOrbit(false)
+    {
+        QFont newFont(font());
+        newFont.setPointSize(30);
+        setFont(newFont);
+
+        obl = degToRads(97.77);
+        zEq = Point3d(0,sin(obl),cos(obl));
+        xEq = Point3d(1, 0, 0);
+        eqRotAngles = angularMapping(zEq, xEq);
+
+        prepfs();
+        setMouseTracking(true);
+        connect(&settings, SIGNAL(changed()), this, SLOT(updateGL()));
+    }
+
+    /*! @brief Initializes the settings dialog
+
+        This function takes in OrbitalAnimatorSettings and returns a QWidget containing the initialized settingsDialog.
+    */
+    QWidget* OrbitalAnimator::setupUI(OrbitalAnimatorSettings& animatorSettings) {
+        controlsWidget = new QWidget;
+        settingsDialog = new SettingsDialog(animatorSettings, controlsWidget);
+        QVBoxLayout* controlsLayout = new QVBoxLayout;
+        controlsLayout->addWidget(settingsDialog);
+        controlsWidget->setLayout(controlsLayout);
+        return controlsWidget;
+    }
+
+    /*! @brief Sets up OpenGL context rendering flags
+
+        This function is reimplemented from QGLWidget. It sets up flags to be used when the scene is rendered.
+        Various options can be enabled and disabled - here, GL_DEPTH_TEST and GL_BLEND are enabled.
+        For more information, see <a href="http://qt-project.org/doc/qt-4.8/opengl-hellogl.html"> http://qt-project.org/doc/qt-4.8/opengl-hellogl.html </a> and
+        <a href="http://harmattan-dev.nokia.com/docs/library/html/qt4/qglwidget.html"> http://harmattan-dev.nokia.com/docs/library/html/qt4/qglwidget.html </a>
+    */
+    void OrbitalAnimator::initializeGL()
+    {
+        glClearColor(0.0, 0.0, 0.0, 0.0);
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+    }
+
+    /*! @brief Resizes the OpenGL viewport
+
+        This function is reimplemented from QGLWidget. It is called whenever the window is resized.
+        It also sets up the projection matrix. OpenGL uses different matrices to render scenes.
+        To switch between matrices, use the function glMatrixMode(). After calling this function,
+        all subsequent gl function calls will modify the matrix passed in the argument.
+        One of the matrices OpenGL uses is called the projection matrix.
+        The projection matrix determines the prism of view volume in eye space.
+        Basically, it describes a 3d space through which the camera will look.
+        In this case, the 3d space will be a rectangular prism, since it is glOrtho().
+        If it is changed to glFrustum, the 3d space will instead be a frustum.
+        To see the difference between these two, refer to slides 16 and 34 here:
+        <a href="http://www.cs.cornell.edu/Courses/cs4620/2012fa/lectures/10opengl02.pdf">
+        http://www.cs.cornell.edu/Courses/cs4620/2012fa/lectures/10opengl02.pdf </a>.
+        The arguments to glOrtho() define the planes of the rectangular prism (left side, right side,
+        top side, bottom side, near side, far side) in relation to the camera position.
+        Another matrix OpenGL uses is the ModelView matrix. This matrix describes the object that
+        the camera is looking at. The matrix mode is left as the ModelView matrix after this function
+        has completed, meaning that when paintGL is called, all of its functions modify the ModelView
+        matrix. The only thing modifying the ModelView matrix here is the function gluLookAt().
+        The first three arguments to this function determine where the camera is located. In this
+        case, the camera is located 30 units along the positive Z axis (out of the screen). The
+        next three arguments determine the position at which the camera is pointed. The final three
+        arguments determine a vector that defines what direction "up" is.
+    */
+    void OrbitalAnimator::resizeGL(int w, int h)
+    {
+        int newDim = std::min(w, h);
+        glViewport(0, 0, (GLint)newDim, (GLint)newDim);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-0.5, +0.5, -0.5, +0.5, 1.0, 40.0);
+        glMatrixMode(GL_MODELVIEW);
+        gluLookAt(0, 0, 30, 0, 0, 0, 0, 1, 0);
+    }
+
+    /*! @brief Renders the scene
+
+        This function is called everytime updateGL() is called.
+        This is where everything in the OrbitalAnimator is drawn.
+        The functions glPushMatrix() and glPopMatrix() are used frequently here.
+        Basically, glPushMatrix() saves the current ModelView matrix. Then, matrix modifications can be made
+        and objects can be drawn. Once glPopMatrix() is called, the original ModelView matrix is restored.
+    */
+    void OrbitalAnimator::paintGL() {
+        glPushMatrix();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        double orbitXScaleFactor = maxima.x - origin.x;
+        double orbitYScaleFactor = maxima.y - origin.y;
+        double orbitZScaleFactor = maxima.z - origin.z;
+        double orbitScaleFactor = 1. / std::max(orbitXScaleFactor, std::max(orbitYScaleFactor, orbitZScaleFactor));
+        glScalef(scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor);
+        glRotatef(-90, 1, 0, 0); // Change x-y orbital plane to x-z Display plane for display
+        glRotatef(-90, 0, 0, 1);
+        glRotatef(xrotation, 1, 0, 0);
+        glRotatef(yrotation, 0, 1, 0);
+        glRotatef(zrotation, 0, 0, 1);
+        if (settings.displayCoords() && simulationDataLoaded) drawCoords(coordLength);
+
+        glPushMatrix();
+        glColor4f(settings.centralBodyColor().red() / 255.,
+                  settings.centralBodyColor().green() / 255.,
+                  settings.centralBodyColor().blue() / 255.,
+                  settings.centralBodyColor().alpha() / 255.);
+        if (settings.displayCentralBody()) {
+            centralBody.updateRadius(0.02 * coordLength);
+            centralBody.draw();
+        }
+        glPopMatrix();
+
+        for (size_t i = 0; i < staticEquatorialOrbits.size(); ++i)
+        {
+            if (equatorialOrbits[i].frameStart <= currentIndex &&
+                equatorialOrbits[i].frameEnd >= currentIndex)
+            {
+                glPushMatrix();
+                glRotatef(radsToDeg(eqRotAngles.phi), 0, 0, 1); // now do the three rotations to line up the axes
+                glRotatef(radsToDeg(eqRotAngles.theta), 0, 1, 0);
+                glRotatef(radsToDeg(eqRotAngles.psi), 0, 0, 1);
+
+                glColor4f(equatorialOrbits[i].red / 255.,
+                          equatorialOrbits[i].green / 255.,
+                          equatorialOrbits[i].blue / 255.,
+                          1.);
+                drawOrbitalRing(staticEquatorialOrbits[i].vertices);
+                glPopMatrix();
+            }
+        }
+
+        for (size_t i = 0; i < staticEclipticOrbits.size(); ++i)
+        {
+            if (eclipticOrbits[i].frameStart <= currentIndex && eclipticOrbits[i].frameEnd >= currentIndex)
+            {
+                glPushMatrix();
+                glColor4f(eclipticOrbits[i].red / 255.,
+                          eclipticOrbits[i].green / 255.,
+                          eclipticOrbits[i].blue / 255.,
+                          1.);
+                drawOrbitalRing(staticEclipticOrbits[i].vertices);
+                glPopMatrix();
+            }
+        }
+
+        if (settings.displayMainOrbit() && simulationDataLoaded)
+        {
+            glPushMatrix();
+            if (drawFullOrbit) drawOrbit();
+            else { drawTrail(); drawParticle(); }
+            //drawOrbitalNormal();
+            glPopMatrix();
+        }
+/*
+        if(settings.displaySpinAxis() && simulationDataLoaded)
+        {
+            glPushMatrix();
+            glColor4f(0, 0, 1., 1.);
+            drawVector(zEq*coordLength);
+            glPopMatrix();
+        }
+*/
+
+        // DT: Here are plane drawing examples. For opacity, you should draw these are end. Not sure why, honestly
+        //drawXZPlane(coordLength);
+        //drawYZPlane(coordLength);
+        //drawXYPlane(coordLength);
+
+        if (loading) drawLoading<OpenGL>();
+        drawStats<OpenGL>();
+        glPopMatrix();
+    }
+
+    void OrbitalAnimator::drawTrail() {
+        glPushMatrix();
+        glBegin(GL_LINE_STRIP);
+        glColor4f(0.8, 0.4, 0.0, 1.0);
+        for (int i = currentIndex < trailLength ? 0 : currentIndex - trailLength; i < currentIndex; i++) {
+            glRotatef(orbitData[0][i].Omega, 0, 0, 1);
+            glRotatef(orbitData[0][i].i, 1, 0, 0);
+            glRotatef(orbitData[0][i].w, 0, 0, 1);
+            glVertex3f(orbitData[0][i].posInPlane.x,
+                       orbitData[0][i].posInPlane.y,
+                       orbitData[0][i].posInPlane.z);
+        }
+        glEnd();
+        glPopMatrix();
+    }
+
+    void OrbitalAnimator::drawParticle() {
+        for (OrbitData::const_iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) {
+            if ((size_t)currentIndex < (itr->second).size()) {
+                glPushMatrix();
+                glColor4f(1.0, 1.0, 0.0, 1.0);
+                glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
+                glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
+                glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                glTranslatef((itr->second)[currentIndex].posInPlane.x,
+                             (itr->second)[currentIndex].posInPlane.y,
+                             (itr->second)[currentIndex].posInPlane.z);
+                Sphere obj(20, 20, 0.005 * coordLength);
+                obj.draw();
+                glPopMatrix();
+            }
+        }
+    }
+
+    void OrbitalAnimator::drawOrbit()
+    {
+        glColor4f(settings.orbitalPlaneColor().red() / 255.,
+                  settings.orbitalPlaneColor().green() / 255.,
+                  settings.orbitalPlaneColor().blue() / 255.,
+                  settings.orbitalPlaneColor().alpha() / 255.);
+        glPushMatrix();
+        glRotatef(orbitData[0][currentIndex].Omega, 0, 0, 1);
+        glRotatef(orbitData[0][currentIndex].i, 1, 0, 0);
+        glRotatef(orbitData[0][currentIndex].w, 0, 0, 1);
+        glBegin(GL_POLYGON);
+        for (int f = 0; f < 360; ++f) {
+            glVertex3f(orbitData[0][currentIndex].orbitCoords[f].x,
+                       orbitData[0][currentIndex].orbitCoords[f].y,
+                       orbitData[0][currentIndex].orbitCoords[f].z);
+        }
+        glEnd();
+
+        glColor4f(settings.orbitColor().red() / 255.,
+                  settings.orbitColor().green() / 255.,
+                  settings.orbitColor().blue() / 255.,
+                  settings.orbitColor().alpha() / 255.);
+        glBegin(GL_LINE_STRIP);
+        for (int f = 0; f < 360; ++f) {
+            glVertex3f(orbitData[0][currentIndex].orbitCoords[f].x,
+                       orbitData[0][currentIndex].orbitCoords[f].y,
+                       orbitData[0][currentIndex].orbitCoords[f].z);
+        }
+        glVertex3f(orbitData[0][currentIndex].orbitCoords[0].x,
+                   orbitData[0][currentIndex].orbitCoords[0].y,
+                   orbitData[0][currentIndex].orbitCoords[0].z);
+        glEnd();
+        glPopMatrix();
+    }
+
+    void OrbitalAnimator::updateEclipticCache(StaticDisplayOrbits const& eco) {
+        eclipticOrbits = eco;
+        if (nothingLoaded()) { maxima = Point3d::minPoint(); origin = Point3d::maxPoint(); }
+        staticEclipticOrbits.clear();
+        for (StaticDisplayOrbits::const_iterator itr = eclipticOrbits.begin(), endItr = eclipticOrbits.end();
+            itr != endItr; ++itr)
+        {
+            staticEclipticOrbits.push_back(OrbitCalcs(*itr, cosfs, sinfs));
+        }
+        if (nothingLoaded()) {
+            for (size_t i = 0; i < staticEclipticOrbits.size(); ++i)
+            {
+                origin = findMin(staticEquatorialOrbits[i].origin, origin);
+                maxima = findMax(staticEquatorialOrbits[i].origin, maxima);
+            }
+        }
+        loading = false;
+        updateGL();
+    }
+
+    void OrbitalAnimator::updateEquatorialCache(StaticDisplayOrbits const& eqo) {
+        equatorialOrbits = eqo;
+        if (nothingLoaded()) { maxima = Point3d::minPoint(); origin = Point3d::maxPoint(); }
+        staticEquatorialOrbits.clear();
+        for (StaticDisplayOrbits::const_iterator itr = equatorialOrbits.begin(), endItr = equatorialOrbits.end();
+            itr != endItr; ++itr)
+        {
+            staticEquatorialOrbits.push_back(OrbitCalcs(*itr, cosfs, sinfs));
+        }
+
+        if (nothingLoaded()) {
+            for (size_t i = 0; i < staticEquatorialOrbits.size(); ++i)
+            {
+                origin = findMin(staticEquatorialOrbits[i].origin, origin);
+                maxima = findMax(staticEquatorialOrbits[i].origin, maxima);
+            }
+        }
+        loading = false;
+        updateGL();
+    }
+
+    void OrbitalAnimator::updateSimulationCache(OrbitData const& d, bool fullOrbit) {
+        drawFullOrbit = fullOrbit;
+        orbitData = d;
+        if (nothingLoaded()) { maxima = Point3d::minPoint(); origin = Point3d::maxPoint(); }
+        simulationSize = 0;
+        for (OrbitData::iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) {
+            for (size_t i = 0; i < (itr->second).size(); i++) {
+                if (!fullOrbit) (itr->second)[i].calculatePosition(cosfs, sinfs);
+                else (itr->second)[i].calculateOrbit(cosfs, sinfs);
+                if (nothingLoaded()) {
+                    origin = findMin(staticEquatorialOrbits[i].origin, origin);
+                    maxima = findMax(staticEquatorialOrbits[i].origin, maxima);
+                }
+            }
+            if ((itr->second).size() > (size_t)simulationSize) simulationSize = (itr->second).size();
+        }
+        coordLength = std::max(ABS(maxima.x), std::max(ABS(maxima.y), std::max(ABS(maxima.z),
+                               std::max(ABS(origin.x), std::max(ABS(origin.y), ABS(origin.z))))));
+        settingsDialog->setFrameRange(simulationSize);
+        loading = false;
+        updateGL();
+    }
+
+    void OrbitalAnimator::clearEquatorialData() {
+        staticEquatorialOrbits.clear();
+        equatorialDataLoaded = false;
+        if (!eclipticDataLoaded && !simulationDataLoaded) {
+            origin = Point3d(0, 0, 0);
+            maxima = Point3d(0, 0, 0);
+            coordLength = 0;
+        }
+        updateGL();
+    }
+
+    void OrbitalAnimator::clearEclipticData() {
+        staticEclipticOrbits.clear();
+        eclipticDataLoaded = false;
+        if (!equatorialDataLoaded && !simulationDataLoaded) {
+            origin = Point3d(0, 0, 0);
+            maxima = Point3d(0, 0, 0);
+            coordLength = 0;
+        }
+        updateGL();
+    }
+
+    void OrbitalAnimator::clearSimulationData() {
+        orbitData.clear();
+        simulationDataLoaded = false;
+        if (!eclipticDataLoaded && !equatorialDataLoaded) {
+            origin = Point3d(0, 0, 0);
+            maxima = Point3d(0, 0, 0);
+            coordLength = 0;
+        }
+        updateGL();
+    }
+
+    void OrbitalAnimator::clearAllData() {
+        orbitData.clear();
+        staticEclipticOrbits.clear();
+        staticEquatorialOrbits.clear();
+        simulationDataLoaded = false;
+        equatorialDataLoaded = false;
+        eclipticDataLoaded = false;
+        origin = Point3d(0, 0, 0);
+        maxima = Point3d(0, 0, 0);
+        coordLength = 0;
+        updateGL();
+    }
+
+    void setNewRotation(double &rot, double dx) {
+        double xtemp = rot + dx;
+        if (xtemp > 180) rot = xtemp - 360;
+        else if (xtemp < -180) rot = xtemp + 360;
+        else rot = xtemp;
+    }
+
+    void OrbitalAnimator::rotate(double x, double y, double z, int time) {
+        double t = (double)time;
+        double dx = x / t;
+        double dy = y / t;
+        double dz = z / t;
+        for (int i=0; i < time; i++) {
+            setNewRotation(xrotation, dx);
+            setNewRotation(yrotation, dy);
+            setNewRotation(zrotation, dz);
+            settingsDialog->xRotationBox->setValue(xrotation);
+            settingsDialog->yRotationBox->setValue(yrotation);
+            settingsDialog->zRotationBox->setValue(zrotation);
+            updateOrRecord();
+        }
+    }
+
+    void OrbitalAnimator::zoom(double amt, int time) {
+        double dz = (amt * scaleFactor - scaleFactor) / time;
+        for (int i=0; i < time; i++) {
+            scaleFactor += dz;
+            settingsDialog->zoomScaleBox->setValue(scaleFactor);
+            //settingsDialog->scrollZoom->setValue(scaleFactor * 100);
+            updateOrRecord();
+        }
+    }
+
+    void OrbitalAnimator::simulate(int amt, int time) {
+        int remainder = amt % time;
+        int ds = (amt - remainder) / time;
+        for (int i=0; i < time; i++) {
+            currentIndex += ds;
+            settingsDialog->scrollTimeIndex->setValue(currentIndex);
+            settingsDialog->timeIndex->setValue(currentIndex);
+            updateOrRecord();
+        }
+        currentIndex += remainder;
+        if (remainder != 0) updateOrRecord();
+    }
+
+    void OrbitalAnimator::doNothing(int time) { for (int i=0; i < time; i++) updateOrRecord(); }
+
+    void OrbitalAnimator::initialize(double x, double y, double z, double sc, int fr) {
+        xrotation = x;
+        yrotation = y;
+        zrotation = z;
+        scaleFactor = sc;
+        currentIndex = fr;
+        settingsDialog->xRotationBox->setValue(xrotation);
+        settingsDialog->yRotationBox->setValue(yrotation);
+        settingsDialog->zRotationBox->setValue(zrotation);
+        settingsDialog->zoomScaleBox->setValue(scaleFactor);
+        settingsDialog->scrollTimeIndex->setValue(currentIndex);
+        settingsDialog->timeIndex->setValue(currentIndex);
+        updateOrRecord();
+    }
+
+    void OrbitalAnimator::rotate() {
+        rotate(settingsDialog->rotateAmountX->value(),
+               settingsDialog->rotateAmountY->value(),
+               settingsDialog->rotateAmountZ->value(),
+               settingsDialog->rotateSpeed->value());
+    }
+
+    void OrbitalAnimator::zoom() {
+        zoom(settingsDialog->zoomAmount->value(), settingsDialog->zoomSpeed->value());
+    }
+
+    void OrbitalAnimator::simulate() {
+        simulate(settingsDialog->simulateAmount->value(), settingsDialog->simulateSpeed->value());
+    }
+
+    void OrbitalAnimator::performAction(Action act) {
+        switch (act.typ) {
+        case ROTATE: rotate(act.dx, act.dy, act.dz, act.span); break;
+        case ZOOM: zoom(act.newScale, act.span); break;
+        case SIMULATE: simulate(act.dFrame, act.span); break;
+        case PAUSE: doNothing(act.span); break;
+        case INITIALIZE: initialize(act.x, act.y, act.z, act.scale, act.frame);
+        }
+    }
+
+    void OrbitalAnimator::checkAndPerformAction(QTableWidgetItem* item) {
+        QVariant v = item->data(Qt::UserRole);
+        Action act = v.value<Action>();
+        double x = act.x, y = act.y, z = act.z, sc = act.scale, fr = act.frame;
+        switch (act.typ) {
+        case 0:
+            x -= act.dx;
+            y -= act.dy;
+            z -= act.dz;
+            break;
+        case 1:
+            sc = act.prevScale;
+            break;
+        case 2:
+            fr -= act.dFrame;
+            break;
+        }
+        if (act.typ != 4) initialize(x, y, z, sc, fr);
+        performAction(act);
+    }
+
+    void OrbitalAnimator::playbackQueue(QTableWidget* queue) {
+        for (int i=0; i < queue->rowCount(); i++) {
+            QVariant v = queue->item(i, 0)->data(Qt::UserRole);
+            Action act = v.value<Action>();
+            performAction(act);
+        }
+    }
+
+    void OrbitalAnimator::record(QTableWidget* queue) {
+        QFileDialog fileSelector;
+        fileSelector.setFileMode(QFileDialog::Directory);
+        if (fileSelector.exec() == QDialog::Accepted) {
+            directory = fileSelector.selectedFiles().first();
+            recording = true;
+            playbackQueue(queue);
+            recording = false;
+            pictureNumber = 0;
+        }
+    }
+
+    void OrbitalAnimator::updateOrRecord() {
+        if (recording) {
+            saveCurrentImage(pictureNumber, directory);
+            pictureNumber++;
+        }
+        else updateGL();
+    }
+
+    void OrbitalAnimator::wheelEvent(QWheelEvent* we)
+    {
+        int numDegrees = we->delta() / 8;
+        int numSteps = numDegrees / 15;
+
+        if (numSteps < 0) scaleFactor *= pow(.8, -numSteps);
+        else scaleFactor *= pow(1.25, numSteps);
+
+        settingsDialog->zoomScaleBox->setValue(scaleFactor);
+        updateGL();
+    }
+
+    void OrbitalAnimator::mouseMoveEvent(QMouseEvent* event)
+    {
+        int dx = event->x() - lastPos.x();
+        int dy = event->y() - lastPos.y();
+        int speed = 1;
+
+        if (event->buttons() & Qt::LeftButton) {
+            setNewRotation(yrotation, speed * dy);
+            setNewRotation(zrotation, speed * dx);
+            settingsDialog->yRotationBox->setValue(yrotation);
+            settingsDialog->zRotationBox->setValue(zrotation);
+            updateGL();
+        }
+        else if (event->buttons() & Qt::RightButton) {
+            setNewRotation(yrotation, speed * dy);
+            setNewRotation(xrotation, speed * dx);
+            settingsDialog->yRotationBox->setValue(yrotation);
+            settingsDialog->xRotationBox->setValue(xrotation);
+            updateGL();
+        }
+
+        lastPos = event->pos();
+    }
+
+    void OrbitalAnimator::prepfs() {
+        for (int f = 0; f < 360; ++f) {
+            cosfs[f] = cos(static_cast<double>(f / 180. * M_PI));
+            sinfs[f] = sin(static_cast<double>(f / 180. * M_PI));
+        }
+    }
+
+    template<>
+    void OrbitalAnimator::setTextColor<OrbitalAnimator::Pixmap>(QColor c)
+    {
+        if (!currentPainter) throw std::runtime_error("No painter set");
+        currentPainter->setPen(c);
+    }
+
+    template<>
+    void OrbitalAnimator::setTextColor<OrbitalAnimator::OpenGL>(QColor c)
+    {
+        glColor4f(c.red() / 255., c.green() / 255., c.blue() / 255., c.alpha() / 255.);
+    }
+
+    template<>
+    void OrbitalAnimator::drawText<OrbitalAnimator::Pixmap>(QString str, int topLeftX, int topLeftY, QFontMetrics* fm)
+    {
+        if (!currentPainter) throw std::runtime_error("No painter set");
+        currentPainter->drawText(QPointF(topLeftX, fm->height() + topLeftY), str);
+    }
+
+    template<>
+    void OrbitalAnimator::drawText<OrbitalAnimator::OpenGL>(QString str, int topLeftX, int topLeftY, QFontMetrics* fm)
+    {
+        renderText(topLeftX, fm->height() + topLeftY, str);
+    }
+
+    template<OrbitalAnimator::Display disp>
+    void OrbitalAnimator::drawLoading()
+    {
+        setTextColor<disp>(QColor(0, 255, 0, 255));
+        QFontMetrics fm(font());
+        QString text;
+        text = QString("Loading...");
+        int textWidth = fm.width(text);
+        drawText<disp>(text, width() - textWidth - 10, height() - 50, &fm);
+    }
+
+    template<OrbitalAnimator::Display disp>
+    void OrbitalAnimator::drawStats()
+    {
+        setTextColor<disp>(QColor(255, 255, 255, 255));
+        QString x = QString("X Rot (deg) : %1").arg(xrotation);
+        QString y = QString("Y Rot (deg) : %1").arg(yrotation);
+        QString z = QString("Z Rot (deg) : %1").arg(zrotation);
+        QString zoom = QString("Zoom : %1%").arg(scaleFactor * 100);
+        QString frame = QString("Frame Number : %1").arg(simulationDataLoaded ? currentIndex + 1 : 0);
+        QFont f;
+        f.setPointSize(16);
+        renderText(10, 25, x, f);
+        renderText(10, 45, y, f);
+        renderText(10, 65, z, f);
+        renderText(10, 85, zoom, f);
+        renderText(10, 105, frame, f);
+    }
+
+    void OrbitalAnimator::setXRot(double deg) { xrotation = std::max(-180.0, std::min(180.0, deg)); updateGL(); }
+    void OrbitalAnimator::setYRot(double deg) { yrotation = std::max(-180.0, std::min(180.0, deg)); updateGL(); }
+    void OrbitalAnimator::setZRot(double deg) { zrotation = std::max(-180.0, std::min(180.0, deg)); updateGL(); }
+
+    void OrbitalAnimator::setZoomFactor(double zoom)
+    {
+        double f = std::max(0.01, std::min(10000.0, zoom));
+        scaleFactor = f;
+        updateGL();
+    }
+
+    void OrbitalAnimator::setZoomFactor(int zoom)
+    {
+        double f = std::max(0.01, std::min(10000.0, (double)zoom / 100.0));
+        scaleFactor = f;
+        updateGL();
+    }
+/*
+    void drawOrbitalPlane(std::vector<Eigen::Vector3d> const& vertices)
+    {
+        glPushMatrix();
+        glRotatef(orbitData[0][currentIndex].Omega, 0, 0, 1);
+        glRotatef(orbitData[0][currentIndex].i, 1, 0, 0);
+        glRotatef(orbitData[0][currentIndex].w, 0, 0, 1);
+        glBegin(GL_POLYGON);
+        for (int f = 0; f < 360; ++f) glVertex3f(vertices[f].x, vertices[f].y, vertices[f].z);
+        glEnd();
+        glPopMatrix();
+    }
+*/
+/*
+    void OrbitalAnimator::drawOrbitalNormal()
+    {
+        glColor4f(settings.orbitColor().red() / 255.,
+                  settings.orbitColor().green() / 255.,
+                  settings.orbitColor().blue() / 255.,
+                  settings.orbitColor().alpha() / 255.);
+        drawVector(normals[currentIndex] * normalsScalar);
+    }
+*/
+
+    void drawPlane(QColor const& color, Point3d const& z, GLfloat extent)
+    {
+        glPushMatrix();
+
+        glColor4f(color.red() / 255.,
+                  color.green() / 255.,
+                  color.blue() / 255.,
+                  color.alpha() / 255.);
+
+        // pass 0 vector for xnew cuz we don't care about the orientation of x within the plane
+        RotationAngles angles = angularMapping(z, Point3d(0, 0, 0));
+
+        glRotatef(-90, 1, 0, 0); // first rotate so that openGL coordinates become normal
+        glRotatef(-90, 0, 0, 1);
+        glRotatef(radsToDeg(angles.phi), 0, 0, 1); // now do the three rotations to line up the axes
+        glRotatef(radsToDeg(angles.theta), 0, 1, 0);
+        glRotatef(radsToDeg(angles.psi), 0, 0, 1);
+
+        glBegin(GL_QUADS);
+        glVertex3f(-extent, -extent,0);
+        glVertex3f(-extent, extent,0);
+        glVertex3f(extent, extent,0);
+        glVertex3f(extent, -extent,0);
+        glEnd();
+        glPopMatrix();
+    }
+    void drawXZPlane(GLfloat extent)
+    {
+        drawPlane(QColor::fromRgb(0, 255, 0, 32), Point3d(0, 1, 0), extent);
+    }
+    void drawYZPlane(GLfloat extent)
+    {
+        drawPlane(QColor::fromRgb(255, 0, 0, 32), Point3d(1, 0, 0), extent);
+    }
+    void drawXYPlane(GLfloat extent)
+    {
+        drawPlane(QColor::fromRgb(255, 0, 0, 64), Point3d(0, 0, 1), extent);
+    }
+
+    void OrbitalAnimator::setCurrentIndex(int index)
+    {
+        currentIndex = std::max(std::min(index, simulationSize - 1), 0);
+        updateGL();
+    }
+
+    void OrbitalAnimator::advanceTimeIndex()
+    {
+        ++currentIndex;
+        if (currentIndex > simulationSize) currentIndex = 0;
+        updateGL();
+    }
+
+    void OrbitalAnimator::printImages(QString directory, int timeStep)
+    {
+        QProgressDialog progress("Saving Images...", "Cancel", 0, simulationSize / timeStep, this);
+        progress.setWindowModality(Qt::WindowModal);
+        progress.show();
+
+        int prevIndex = currentIndex;
+        QString fileNameTemplate(directory.isEmpty() ? "orbitalFrame_%1.png" : directory + "/orbitalFrame_%1.png");
+        int opNum = 1;
+        for (currentIndex = 0; currentIndex < simulationSize; currentIndex += timeStep, ++opNum)
+        {
+            QGLFramebufferObject buffer(width(), height(), QGLFramebufferObject::CombinedDepthStencil);
+            buffer.bind();
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            paintGL();
+            buffer.release();
+
+            QPixmap p(QPixmap::fromImage(buffer.toImage()));
+
+            QPainter painter(&p);
+            painter.setFont(font());
+            currentPainter = &painter;
+            currentPainter = 0;
+
+            p.save(fileNameTemplate.arg(currentIndex));
+
+            progress.setValue(opNum);
+            if (progress.wasCanceled())
+                break;
+        }
+        currentIndex = prevIndex;
+    }
+    void OrbitalAnimator::saveCurrentImage(int id, QString directory)
+    {
+        QString fileNameTemplate("orbitalFrame_%1_%2_%3%4%5_%6.png");
+        if (!directory.isEmpty())
+            fileNameTemplate = directory + QString("/") + fileNameTemplate;
+
+        // Generate More complex file name
+        QString scaleFactorString = QString("%1").arg(scaleFactor);
+        scaleFactorString.remove(QRegExp("[^0-9]"));
+        QString fname
+            = fileNameTemplate
+            .arg(id, 6, 10, QLatin1Char('0'))
+            .arg(currentIndex)
+            .arg(xrotation < 0 ? QString("N%1").arg(ABS(xrotation)) : QString("P%1").arg(ABS(xrotation)) )
+            .arg(yrotation < 0 ? QString("N%1").arg(ABS(yrotation)) : QString("P%1").arg(ABS(yrotation)) )
+            .arg(zrotation < 0 ? QString("N%1").arg(ABS(zrotation)) : QString("P%1").arg(ABS(zrotation)) )
+            .arg(scaleFactorString);
+        {
+            QGLFramebufferObject buffer(width(), height(), QGLFramebufferObject::CombinedDepthStencil);
+            buffer.bind();
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            paintGL();
+            buffer.release();
+
+            QPixmap p(QPixmap::fromImage(buffer.toImage()));
+
+            QPainter painter(&p);
+            painter.setFont(font());
+            currentPainter = &painter;
+            currentPainter = 0;
+
+            p.save(fname);
+        }
+    }
+
+    std::vector<double> OrbitalAnimator::calcPosition(OrbitDatum_ const& dat) {
+        double radius = dat.axis
+                * (1 - dat.e * dat.e)
+                / (1 + dat.e * cosfs[(size_t)dat.f]);
+        double x = radius * cosfs[(size_t)dat.f];
+        double y = radius * sinfs[(size_t)dat.f];
+        double z = 0;
+        std::vector<double> v (6);
+        v[COORD_X] = x;
+        v[COORD_Y] = y;
+        v[COORD_Z] = z;
+        v[W] = dat.w;
+        v[OMEGA] = dat.Omega;
+        v[I] = dat.i;
+        return v;
+    }
+
+}
+
+OrbitCalcs::OrbitCalcs(OrbitDatum_ const& dat, double* cosfs, double* sinfs)
+{
+    maxima = Point3d::minPoint();
+    origin = Point3d::maxPoint();
+    vertices.resize(360);
+    for (size_t f = 0; f < 360; ++f)
+    {
+        double radius = dat.axis
+                      * (1 - dat.e * dat.e)
+                      / (1 + dat.e * cosfs[f]);
+        double x = radius * cosfs[f];
+        double y = radius * sinfs[f];
+        double z = 0;
+
+        Math::Matrix<4,1> OrbPt = Math::quickColVector(x, y, z, 1);
+
+        double w = degToRads(dat.w);
+        double Omega = degToRads(dat.Omega);
+        double i = degToRads(dat.i);
+
+        Math::Matrix3D orbitalEcl = Math::rotateAboutZ(Omega)
+                                  * Math::rotateAboutX(i)
+                                  * Math::rotateAboutZ(w);
+
+        Math::Matrix<4,1> EclPt = orbitalEcl * OrbPt;
+        vertices[f] = Point3d(EclPt[0], EclPt[1], EclPt[2]);
+    }
+    normal = crossProduct(vertices[0], vertices[1]);
+    for (std::vector<Point3d>::const_iterator itr = vertices.begin(), endItr = vertices.end(); itr != endItr; ++itr)
+    {
+        origin.x = std::min(itr->x, origin.x);
+        origin.y = std::min(itr->y, origin.y);
+        origin.z = std::min(itr->z, origin.z);
+
+        maxima.x = std::max(itr->x, maxima.x);
+        maxima.y = std::max(itr->y, maxima.y);
+        maxima.z = std::max(itr->z, maxima.z);
+    }
+}

@@ -1,0 +1,34 @@
+#ifndef OPENSIMULATIONDIALOG_H
+#define OPENSIMULATIONDIALOG_H
+
+#include <QDialog>
+#include <QFormLayout>
+#include <QComboBox>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QFileDialog>
+#include <QCheckBox>
+
+class OpenSimulationDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    OpenSimulationDialog();
+    QString getFileName() { return fileSelector->text(); }
+    QString getFileType() { return selectFileType->currentText(); }
+    QString getDataType() { return selectDataType->currentText(); }
+    bool getDrawFullOrbit() { return drawFullOrbit->checkState(); }
+
+private:
+    QLineEdit* fileSelector;
+    QComboBox* selectFileType;
+    QComboBox* selectDataType;
+    QCheckBox* drawFullOrbit;
+
+private slots:
+    void openFileDialog();
+};
+
+#endif // OPENSIMULATIONDIALOG_H

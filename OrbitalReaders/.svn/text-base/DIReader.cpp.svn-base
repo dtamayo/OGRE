@@ -1,0 +1,87 @@
+/*!
+* @file DIReader.cpp
+* @brief Contains definition for the class DIFile. This class parses and stores data from .dI files.
+* Parsing is done using QRegExp.*
+*/
+#include "DIReader.h"
+
+/*!
+ * These are strings that the reader will look for in the data file.
+ */
+#define SEPARATOR "\\s*"
+#define DECIMAL_FIELD_REXP "([0-9\\.eE\\-\\+]*)"
+
+/*!
+ * @brief Constructor for DIFile objects. Calls skipToResults then readResults.
+ * @param filename A QString containing the name of the .dI file to be parsed.
+ */
+DIReader::DIReader(QString filename)
+    : dataStart("------------------------------------------------------------------------------")
+    , lineParser(
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP)
+{
+    if(filename.length() > 0)
+    {
+        QFile file(filename);
+        if (file.open(QFile::ReadOnly | QFile::Text))
+        {
+            QTextStream stream(&file);
+            skipToResults(stream);
+            readResults(stream);
+            file.close();
+        }
+    }
+}
+
+/*!
+ * @brief Reads in the .dI file until it finds a line that matches dataStart exactly.
+ */
+void DIReader::skipToResults(QTextStream& stream)
+{
+    while (!stream.atEnd() && !dataStart.exactMatch(stream.readLine())) {}
+}
+
+/*!
+ * @brief The heart of dIReader. This function reads in the data line by line, parses it, then stores
+ * it in an OrbitalData object (which is just an array of OrbitDatum's). An OrbitDatum contains information
+ * about the orbit in a particular frame. Each line of data is stored in an OrbitDatum.
+ */
+void DIReader::readResults(QTextStream& stream)
+{
+    QString line;
+    int lineNum = 0;
+    while (!stream.atEnd())
+    {
+        line = stream.readLine();
+        ++lineNum;
+        if (lineParser.exactMatch(line))
+        {
+            QStringList decimals = lineParser.capturedTexts();
+            Orbit d;
+            bool ok = true;
+            #define HANDLE_ERROR(index) \
+                if (!ok) { \
+                std::ostringstream os; \
+                os << "Could not decode decimal " << decimals.at(index).toAscii().data(); \
+                throw std::runtime_error(os.str()); \
+                }
+            d.time = decimals.at(1).toDouble(&ok); HANDLE_ERROR(1);
+            d.axis = decimals.at(2).toDouble(&ok) * 25559.; HANDLE_ERROR(2);
+            d.e = decimals.at(3).toDouble(&ok); HANDLE_ERROR(3);
+            d.i = decimals.at(4).toDouble(&ok); HANDLE_ERROR(4);
+            d.Omega = decimals.at(5).toDouble(&ok); HANDLE_ERROR(5);
+            d.w = decimals.at(6).toDouble(&ok); HANDLE_ERROR(6);
+            d.f = decimals.at(7).toDouble(&ok); HANDLE_ERROR(7);
+            d.hasOrbEls = true;
+            data[0].push_back(d);
+        }
+    }
+}

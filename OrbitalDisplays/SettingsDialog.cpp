@@ -1,0 +1,293 @@
+/*!
+ @file SettingsDialog.cpp
+ @brief implementation for the class SettingsDialog, the column of boxes and sliders on the right of the window.
+
+ @section LICENSE
+
+ Copyright (c) 2013 Robert Douglas, Heming Ge, Daniel Tamayo
+ Copyright (c) 2012 Robert Douglas
+
+ This file is part of OGRE.
+
+ OGRE is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ OGRE is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with OGRE.  If not, see <http://www.gnu.org/licenses/>.
+
+ The original code for this project was developed by Robert Douglas.
+ This version is derived from Robert Douglas's
+ repository at https://www.assembla.com/profile/rwdougla revision 29.
+ The copyright notice from the original code is given below:
+
+ Copyright (c) 2012 Robert Douglas
+ Distributed under the accompanying Software License, Version 1.0.
+ (See accompanying file LICENSE_ORIGINAL.txt or copy at
+ https://subversion.assembla.com/svn/rob_douglas_sandbox/trunk/license.txt)
+
+ @see SettingsDialog
+*/
+
+#include "SettingsDialog.h"
+
+/*! @brief main namespace for the project
+*/
+namespace Disp
+{
+    /*! @brief Constructor for SettingsDialog.
+
+      Initializes, lays out and connects the signals and slots of the widgets in SettingsDialog.  See @ref modsetdiag
+    */
+    SettingsDialog::SettingsDialog(OrbitalAnimatorSettings& animatorSettings_, QWidget* parent) : QWidget(parent)
+        , animatorSettings(animatorSettings_)
+    {
+        setupUI();
+        layoutControls();
+        makeConnections();
+    }
+
+    void SettingsDialog::setFrame(int fn)
+    {
+        scrollTimeIndex->setValue(fn);
+        timeIndex->setValue(fn);
+        setCurrentIndex(fn);
+    }
+
+    void SettingsDialog::setFrameRange(int fr)
+    {
+        scrollTimeIndex->setRange(0, fr);
+        timeIndex->setRange(0, fr);
+    }
+
+    void SettingsDialog::advanceTime()
+    {
+        scrollTimeIndex->setValue(
+            (scrollTimeIndex->value() + timeStep->value()) > scrollTimeIndex->maximum()
+            ? 0 : scrollTimeIndex->value() + timeStep->value());
+        timeIndex->setValue(
+            (timeIndex->value() + timeStep->value()) > timeIndex->maximum()
+            ? 0 : timeIndex->value() + timeStep->value());
+    }
+
+    /*! @brief Instantiates and sets default values and ranges for all the widgets in SettingsDialog.
+
+    @sa @ref modsetdiag
+
+    This function is called internally by the constructor Disp::SettingsDialog::SettingsDialog().
+
+    Initializing classes can be done in the following format:
+
+    @verbatim
+    <instance name> = new <Class name>(<constructor parameters>);
+    @endverbatim
+    e.g.,
+    @code
+    xRotationBox = new QDoubleSpinBox(this);
+    @endcode
+
+    The QDoubleSpinBox constructor takes in the object’s parent widget (must extend QWidget). In this case, it is the settings dialog itself,
+    so the parameter is simply “this.”
+
+    You can also initialize objects in C++ as such:
+
+    @verbatim
+    <Class name> <instance name>(<constructor parameters>);
+    @endverbatim
+
+    However, this allocates stack memory for the object, which is fast, but short-term memory. By using the “new” keyword, we are allocating
+    memory on the heap, which is long-term memory. This is why we had to declare a pointer earlier; the “new” keyword returns a pointer to the
+    object - not the object itself.
+
+    After initializing the widget, you may also want to set your own default values. For example, the xRotationBox has been set to 0 by default,
+    and the range is set from -180 to 180. These initial values can be set in different ways, depending on the object. The QDoubleSpinBox class
+    has straightforward methods (as most Qt classes will) - setValue() and setRange(). If you are unsure of what methods your class has, simply
+    type “xRotationBox->” and it will show a drop down menu of all the member methods available to you (this is assuming you are working in Qt
+    Creator or Visual Studio).
+    */
+    void SettingsDialog::setupUI()
+    {
+        /*
+        xRotationBox = new QDoubleSpinBox(this);
+        xRotationBox->setValue(0);
+        xRotationBox->setRange(-180, 180);
+        xRotationBox->setMaximumSize(70, 50);
+        yRotationBox = new QDoubleSpinBox(this);
+        yRotationBox->setValue(0);
+        yRotationBox->setRange(-180, 180);
+        yRotationBox->setMaximumSize(70, 50);
+        zRotationBox = new QDoubleSpinBox(this);
+        zRotationBox->setValue(0);
+        zRotationBox->setRange(-180, 180);
+        zRotationBox->setMaximumSize(70, 50);
+        */
+        zoomScaleBox = new QSlider(this);
+        zoomScaleBox->setRange(-400, 400);
+        zoomScaleBox->setValue(0);
+        zoomScaleBox->setOrientation(Qt::Horizontal);
+        zoomScaleBox->setMaximumSize(70, 50);
+        //scrollZoom = new QSlider(this);
+        //scrollZoom->setOrientation(Qt::Horizontal);
+        //scrollZoom->setRange(1, 1000000);
+        //scrollZoom->setValue(100);
+
+        scrollTimeIndex = new QSlider(this);
+        scrollTimeIndex->setOrientation(Qt::Horizontal);
+        scrollTimeIndex->setRange(0, 0);
+        timeIndex = new QSpinBox(this);
+        timeIndex->setRange(0, 0);
+
+        timeStep = new QSpinBox(this);
+        timeStep->setRange(1, 1000);
+        timeStep->setValue(1);
+
+        animate = new QCheckBox(this);
+        /*
+        rotateAmountX = new QDoubleSpinBox(this);
+        rotateAmountX->setRange(-8640, 8640);
+        rotateAmountX->setValue(0);
+        rotateAmountY = new QDoubleSpinBox(this);
+        rotateAmountY->setRange(-8640, 8640);
+        rotateAmountY->setValue(0);
+        rotateAmountZ = new QDoubleSpinBox(this);
+        rotateAmountZ->setRange(-8640, 8640);
+        rotateAmountZ->setValue(0);
+        rotateSpeed = new QSpinBox(this);
+        rotateSpeed->setRange(1, 100);
+        rotateSpeed->setValue(10);
+        rotator = new QPushButton("Rotate", this);
+
+        zoomAmount = new QDoubleSpinBox(this);
+        zoomAmount->setRange(0.01, 100);
+        zoomAmount->setSingleStep(0.1);
+        zoomAmount->setValue(1);
+        zoomSpeed = new QSpinBox(this);
+        zoomSpeed->setRange(1, 100);
+        zoomSpeed->setValue(10);
+        zoomer = new QPushButton("Zoom", this);
+
+        simulateAmount = new QSpinBox(this);
+        simulateAmount->setRange(1, 1000);
+        simulateAmount->setValue(1);
+        simulateSpeed = new QSpinBox(this);
+        simulateSpeed->setRange(1, 100);
+        simulateSpeed->setValue(10);
+        simulator = new QPushButton("Simulate", this);
+        */
+    }
+
+    /*! @brief Organizes and displays the widgets in SettingsDialog
+
+    @sa This is one step in a linked walkthrough of how to modify the user interface on the right of the window. See @ref modsetdiag
+
+    Once widgets defined in SettingsDialog are initialized by Disp::SettingsDialog::setupUI(), the constructor
+    Disp::SettingsDialog::SettingsDialog calls this private member function, which makes widgets show up on the window.
+
+    Since the settings dialog is meant to display many different widgets, it must use a layout of some sort to make
+    sure that the widgets show up in the right place.
+
+    We use a QFormLayout (controlLayout) to organize the widgets. This layout organizes widgets vertically, and adds a text label
+    to each.
+
+    @code
+    QFormLayout* controlLayout = new QFormLayout;
+    @endcode
+
+    Other simple layouts you might wnat to look at are QHBoxLayout and QVBoxLayout for horizontal and vertical lineups of widgets, respectively.
+    If you're interested in more layout options, check out the Qt Layout documentation: <a href="http://qt-project.org/doc/qt-4.8/layout.html">
+    http://qt-project.org/doc/qt-4.8/layout.html </a>.
+
+    To add your widget, you can simply call addRow(). The first argument is the label you want next to your widget. The second argument is the
+    widget itself. For example, to add the spinbox widget xRotationBox to controlLayout:
+
+    @code
+    controlLayout->addRow(“X Rotation”, xRotationBox));
+    @endcode
+
+    */
+    void SettingsDialog::layoutControls()
+    {
+        QFormLayout* controlLayout = new QFormLayout;
+
+        //controlLayout->addRow("X Rotation", xRotationBox);
+        //controlLayout->addRow("Y Rotation", yRotationBox);
+        //controlLayout->addRow("Z Rotation", zRotationBox);
+        controlLayout->addRow("Zoom Factor", zoomScaleBox);
+        //controlLayout->addRow("Scroll Zoom", scrollZoom);
+        controlLayout->addRow("Scroll Time", scrollTimeIndex);
+        controlLayout->addRow("Frame Number", timeIndex);
+        controlLayout->addRow("Time Step", timeStep);
+        controlLayout->addRow("Play", animate);
+        /*
+        controlLayout->addRow("Rotate X By: ", rotateAmountX);
+        controlLayout->addRow("Rotate Y By: ", rotateAmountY);
+        controlLayout->addRow("Rotate Z By: ", rotateAmountZ);
+        controlLayout->addRow("Rotate Speed: ", rotateSpeed);
+        controlLayout->addRow("", rotator);
+        controlLayout->addRow("Zoom by: ", zoomAmount);
+        controlLayout->addRow("Zoom Speed: ", zoomSpeed);
+        controlLayout->addRow("", zoomer);
+        controlLayout->addRow("Simulate for: ", simulateAmount);
+        controlLayout->addRow("Simulate Speed: ", simulateSpeed);
+        controlLayout->addRow("", simulator);
+        */
+        setLayout(controlLayout);
+    }
+
+    /*! @brief connect the class's signals to the appropriate slots/signals
+    */
+    void SettingsDialog::makeConnections()
+    {
+
+        connect(timeIndex, SIGNAL(valueChanged(int)), this, SIGNAL(setCurrentIndex(int)));
+        connect(timeIndex, SIGNAL(valueChanged(int)), this, SLOT(setSliderValue(int)));
+        connect(scrollTimeIndex, SIGNAL(valueChanged(int)), this, SIGNAL(setCurrentIndex(int)));
+        connect(scrollTimeIndex, SIGNAL(valueChanged(int)), this, SLOT(setBoxValue(int)));
+/*
+        connect(xRotationBox, SIGNAL(valueChanged(double)), this, SIGNAL(setXRot(double)));
+        connect(yRotationBox, SIGNAL(valueChanged(double)), this, SIGNAL(setYRot(double)));
+        connect(zRotationBox, SIGNAL(valueChanged(double)), this, SIGNAL(setZRot(double)));
+*/
+        connect(zoomScaleBox, SIGNAL(valueChanged(int)), this, SIGNAL(setZoomFactor(int)));
+        //connect(scrollZoom, SIGNAL(valueChanged(int)), this, SIGNAL(setZoomFactor(int)));
+
+        connect(animate, SIGNAL(clicked(bool)), this, SIGNAL(handleAnimateChecked(bool)));
+        /*
+        connect(rotator, SIGNAL(clicked()), this, SIGNAL(rotate()));
+        connect(zoomer, SIGNAL(clicked()), this, SIGNAL(zoom()));
+        connect(simulator, SIGNAL(clicked()), this, SIGNAL(simulate()));
+        */
+    }
+
+    void SettingsDialog::selectCentralBodyColor()
+    {
+        QColorDialog dlg(animatorSettings.centralBodyColor(), this);
+        dlg.setOption(QColorDialog::ShowAlphaChannel, true);
+        connect(&dlg, SIGNAL(currentColorChanged(const QColor&)),
+                &animatorSettings, SLOT(setCentralBodyColor(const QColor&)));
+        dlg.exec();
+    }
+
+    void SettingsDialog::selectOrbitalPlaneColor()
+    {
+        QColorDialog dlg(animatorSettings.orbitalPlaneColor(), this);
+        dlg.setOption(QColorDialog::ShowAlphaChannel, true);
+        connect(&dlg, SIGNAL(currentColorChanged(const QColor&)),
+                &animatorSettings, SLOT(setOrbitalPlaneColor(const QColor&)));
+        dlg.exec();
+    }
+
+    void SettingsDialog::selectOrbitColor()
+    {
+        QColorDialog dlg(animatorSettings.orbitColor(), this);
+        connect(&dlg, SIGNAL(currentColorChanged(const QColor&)),
+                &animatorSettings, SLOT(setOrbitColor(const QColor&)));
+        dlg.exec();
+    }
+}

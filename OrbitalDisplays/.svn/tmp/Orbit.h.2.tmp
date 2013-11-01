@@ -1,0 +1,52 @@
+#ifndef ORBIT_H
+#define ORBIT_H
+
+#include <vector>
+#include <map>
+#include <cmath>
+#include "Point3d.h"
+#include <Geometry>
+#include "GLDrawingFunctions.h"
+
+/*! @brief Takes a double in degrees and returns a double in radians */
+inline double DegToRad(double deg) { return(deg*M_PI/180); }
+
+/*! @brief Takes a double in radians and returns a double in degrees */
+inline double RadToDeg(double rad) { return(rad*180/M_PI); }
+
+class Orbit {
+public:
+    Orbit();
+    void calculatePosition(double* cosfs, double* sinfs);
+    void calculateOrbit(double* cosNus, double* sinfs);
+    void convertOrbElsToPos(Point3d& v, double* cosfs, double* sinfs, double f);
+    void xyz2osc();
+    void osc2xyz();
+    void checkElements();
+
+    double time, particleID, axis, e, i, Omega, w, f;
+    double mu;      // G * mass of central objects (needed in order to convert from xyz to osc)
+
+    Eigen::Vector3d r;
+    Eigen::Vector3d v;
+    Point3d posInPlane;
+    std::vector<Point3d> orbitCoords;
+
+    bool hasCoords;
+    bool hasOrbEls;
+
+};
+
+typedef std::map<int,std::vector<Orbit> > OrbitData;
+
+class StaticDisplayOrbit : public Orbit {
+public:
+    QString name;
+    int frameStart;
+    int frameEnd;
+    int red, green, blue;
+};
+
+typedef std::vector<StaticDisplayOrbit> StaticDisplayOrbits;
+
+#endif // ORBIT_H

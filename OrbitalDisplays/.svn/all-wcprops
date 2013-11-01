@@ -1,0 +1,155 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/orbitframework/!svn/ver/52/branches/OrbitVisualizer/OrbitalDisplays
+END
+QueueActionDialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/orbitframework/!svn/ver/39/branches/OrbitVisualizer/OrbitalDisplays/QueueActionDialog.cpp
+END
+Transforms.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/orbitframework/!svn/ver/30/branches/OrbitVisualizer/OrbitalDisplays/Transforms.hpp
+END
+Settings.h
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/orbitframework/!svn/ver/37/branches/OrbitVisualizer/OrbitalDisplays/Settings.h
+END
+GLDrawingFunctions.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/orbitframework/!svn/ver/44/branches/OrbitVisualizer/OrbitalDisplays/GLDrawingFunctions.cpp
+END
+QueueActionDialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/orbitframework/!svn/ver/39/branches/OrbitVisualizer/OrbitalDisplays/QueueActionDialog.h
+END
+OrbitalAnimationDriver.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/orbitframework/!svn/ver/52/branches/OrbitVisualizer/OrbitalDisplays/OrbitalAnimationDriver.cpp
+END
+Matrix.hpp
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/orbitframework/!svn/ver/30/branches/OrbitVisualizer/OrbitalDisplays/Matrix.hpp
+END
+GLDrawingFunctions.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/orbitframework/!svn/ver/44/branches/OrbitVisualizer/OrbitalDisplays/GLDrawingFunctions.h
+END
+MainWindow.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/orbitframework/!svn/ver/43/branches/OrbitVisualizer/OrbitalDisplays/MainWindow.cpp
+END
+OrbitalDisplays.pri
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/OrbitalDisplays/OrbitalDisplays.pri
+END
+OrbitalAnimationDriver.h
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/OrbitalDisplays/OrbitalAnimationDriver.h
+END
+Orbit.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/orbitframework/!svn/ver/48/branches/OrbitVisualizer/OrbitalDisplays/Orbit.cpp
+END
+Point3d.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/orbitframework/!svn/ver/41/branches/OrbitVisualizer/OrbitalDisplays/Point3d.cpp
+END
+SettingsDialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/orbitframework/!svn/ver/52/branches/OrbitVisualizer/OrbitalDisplays/SettingsDialog.cpp
+END
+MainWindow.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/orbitframework/!svn/ver/39/branches/OrbitVisualizer/OrbitalDisplays/MainWindow.h
+END
+Queue.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/orbitframework/!svn/ver/48/branches/OrbitVisualizer/OrbitalDisplays/Queue.cpp
+END
+Orbit.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/orbitframework/!svn/ver/48/branches/OrbitVisualizer/OrbitalDisplays/Orbit.h
+END
+main.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/orbitframework/!svn/ver/55/branches/OrbitVisualizer/OrbitalDisplays/main.cpp
+END
+SettingsDialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/orbitframework/!svn/ver/52/branches/OrbitVisualizer/OrbitalDisplays/SettingsDialog.h
+END
+Point3d.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/orbitframework/!svn/ver/41/branches/OrbitVisualizer/OrbitalDisplays/Point3d.h
+END
+OpenSimulationDialog.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/orbitframework/!svn/ver/44/branches/OrbitVisualizer/OrbitalDisplays/OpenSimulationDialog.cpp
+END
+OrbitalAnimator.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/orbitframework/!svn/ver/55/branches/OrbitVisualizer/OrbitalDisplays/OrbitalAnimator.cpp
+END
+Queue.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/orbitframework/!svn/ver/48/branches/OrbitVisualizer/OrbitalDisplays/Queue.h
+END
+OpenSimulationDialog.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/orbitframework/!svn/ver/41/branches/OrbitVisualizer/OrbitalDisplays/OpenSimulationDialog.h
+END
+OrbitalAnimator.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/orbitframework/!svn/ver/52/branches/OrbitVisualizer/OrbitalDisplays/OrbitalAnimator.h
+END

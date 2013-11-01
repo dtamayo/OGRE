@@ -1,0 +1,40 @@
+#include "OpenSimulationDialog.h"
+
+OpenSimulationDialog::OpenSimulationDialog() : QDialog() {
+    setWindowTitle("Open Simulation");
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    QFormLayout* form = new QFormLayout;
+    selectFileType = new QComboBox;
+    selectFileType->addItem("dI File", 0);
+    selectFileType->addItem("SWIFT File", 0);
+    selectDataType = new QComboBox;
+    selectDataType->addItem("Orbital Elements");
+    selectDataType->addItem("XYZ");
+    QHBoxLayout* fileSelectorLayout = new QHBoxLayout;
+    fileSelector = new QLineEdit;
+    QPushButton* browse = new QPushButton("Browse", this);
+    fileSelectorLayout->addWidget(fileSelector);
+    fileSelectorLayout->addWidget(browse);
+    drawFullOrbit = new QCheckBox;
+    form->addRow("Select file type: ", selectFileType);
+    form->addRow("Select data type: ", selectDataType);
+    form->addRow("Select file: ", fileSelectorLayout);
+    form->addRow("Draw full orbit: ", drawFullOrbit);
+    QHBoxLayout* buttons = new QHBoxLayout;
+    QPushButton* acceptButton = new QPushButton("Accept", this);
+    QPushButton* cancelButton = new QPushButton("Cancel", this);
+    buttons->addWidget(cancelButton);
+    buttons->addWidget(acceptButton);
+    mainLayout->addLayout(form);
+    mainLayout->addLayout(buttons);
+    setLayout(mainLayout);
+    connect(browse, SIGNAL(clicked()), this, SLOT(openFileDialog()));
+    connect(acceptButton, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
+}
+
+void OpenSimulationDialog::openFileDialog() {
+    QFileDialog dlg;
+    if (dlg.exec() == QDialog::Accepted) fileSelector->setText(dlg.selectedFiles().first());
+}
+

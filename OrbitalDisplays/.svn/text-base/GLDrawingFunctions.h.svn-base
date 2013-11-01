@@ -1,0 +1,68 @@
+#ifndef EXTERNAL_FUNCTIONS_H
+#define EXTERNAL_FUNCTIONS_H
+
+#include <vector>
+#include "Point3d.h"
+#include "Transforms.hpp"
+#include <cmath>
+#include <QColor>
+#include <Geometry>
+#ifdef WIN32
+#include <windows.h>
+#include <GL/gl.h>
+#else
+#include <OpenGl/gl.h>
+#endif
+
+#define X_ 0
+#define Y_ 1
+#define Z_ 2
+
+inline double degToRads(double deg) { return deg * M_PI / 180.; }
+inline double radsToDeg(double rads) { return rads * 180. / M_PI; }
+
+void drawsphere(int sectors, int rings, int radius);
+
+class Sphere
+{
+public:
+	Sphere(int sectors, int rings, int radius);
+	void updateRadius(int radius);
+	void draw();
+
+private:
+	std::vector<float> dat;
+	std::vector<int> idx;
+	int ntri;
+	int sectors;
+	int rings;
+	int radius;
+};
+
+class Cone
+{
+public:
+	Cone(
+        const Point3d &d,
+        const Point3d &a,
+		const double h,
+		const double rd,
+		const int n);
+
+	void draw();
+
+private:
+    std::vector<Point3d> topVertices;
+    std::vector<Point3d> fanVertices;
+};
+
+void drawCoords(GLfloat extent);
+void drawVectorCoords(GLfloat extent);
+void drawVector(Point3d const& v);
+void drawOrbitalRing(std::vector<Point3d> const& vertices);
+void drawPlane(QColor const& color, Point3d const& z, GLfloat extent);
+void drawXYPlane(GLfloat extent);
+void drawXZPlane(GLfloat extent);
+void drawYZPlane(GLfloat extent);
+
+#endif

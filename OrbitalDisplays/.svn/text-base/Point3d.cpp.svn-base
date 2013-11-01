@@ -1,0 +1,143 @@
+//          Copyright Robert Douglas 2012
+// Distributed under the accompanying Software License, Version 1.0.
+//    (See accompanying file license.txt or copy at
+//          https://subversion.assembla.com/svn/rob_douglas_sandbox/trunk/license.txt)
+
+#include "Point3d.h"
+
+#include <limits>
+
+#ifdef WIN32
+	#ifdef max
+	#undef max
+	#endif
+
+	#ifdef min
+	#undef min
+	#endif
+#endif
+
+Point3d::Point3d() : x(0), y(0), z(0) {}
+Point3d::Point3d(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
+Point3d Point3d::maxPoint()
+{
+    return Point3d(
+        std::numeric_limits<double>::max(),
+        std::numeric_limits<double>::max(),
+        std::numeric_limits<double>::max());
+}
+Point3d Point3d::minPoint()
+{
+    return Point3d(
+        std::numeric_limits<double>::min(),
+        std::numeric_limits<double>::min(),
+        std::numeric_limits<double>::min());
+}
+Point3d Point3d::centerOf(Point3d l, Point3d r)
+{
+    return Point3d(
+        l.x / 2.0 + r.x / 2.0,
+        l.y / 2.0 + r.y / 2.0,
+        l.z / 2.0 + r.z / 2.0);
+}
+
+Color::Color(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char alpha_)
+    : r(r_)
+    , g(g_)
+    , b(b_)
+    , alpha(alpha_)
+{}
+Color::Color() : r(0), g(0), b(0), alpha(0) {}
+
+Point3d unitVectorFrom(Point3d const& v) {
+    double mag = magnitude(v);
+    return Point3d(v.x / mag, v.y / mag, v.z / mag);
+}
+
+Point3d findMin(Point3d s, Point3d t) {
+    Point3d r;
+    r.x = std::min(s.x, t.x);
+    r.y = std::min(s.y, t.y);
+    r.z = std::min(s.z, t.z);
+    return r;
+}
+
+Point3d findMax(Point3d s, Point3d t) {
+    Point3d r;
+    r.x = std::max(s.x, t.x);
+    r.y = std::max(s.y, t.y);
+    r.z = std::max(s.z, t.z);
+    return r;
+}
+
+double magnitude(Point3d const& p)
+{
+    return sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
+}
+
+Point3d crossProduct(Point3d const& l, Point3d const& r)
+{
+    return Point3d (
+        l.y * r.z - l.z * r.y,
+        l.z * r.x - l.x * r.z,
+        l.x * r.y - l.y * r.x);
+}
+
+Point3d toUnitVector(Point3d const& orig)
+{
+    double mag = magnitude(orig);
+    return Point3d(
+        orig.x / mag,
+        orig.y / mag,
+        orig.z / mag);
+}
+
+double dotProduct(Point3d const& l, Point3d const& r)
+{
+    return l.x * r.x + l.y * r.y + l.z * r.z;
+}
+
+double angleToUnitX2D(double x, double y)
+{
+    double angleInRad = atan2(abs(y), abs(x));
+    if (x < 0)
+    {
+        if (y < 0) return angleInRad + M_PI;
+        else return M_PI - angleInRad;
+    }
+    else
+    {
+        if (y < 0) return 2 * M_PI - angleInRad;
+        else return angleInRad;
+    }
+}
+RotationAngles angularMapping(Point3d const& znew, Point3d const& xnew)
+// this function returns rotation angles to rotate coordinate systems.  If x,y,z is a coordinate system with z positive
+// upward, x positive out of the screen, and y positive to the right, then znew is the vector along which we want our new
+// z axis, e.g., if znew=(1,0,0), the function would return angles to make x (out of the screen) the new z axis.  Once you line
+// up the new z axis, you still have the liberty of rotating around that new z axis to determine where you want the new x and y
+// axes.  If you don't care about this orientation of x and y, pass a zero vector for xnew and they'll just end up where they
+// want.  Alternatively, you can pass where you want the new x axis to be in xnew, and it will calculate the right angle (psi)
+// for that.
+{
+    RotationAngles results;
+    results.theta = acos(znew.z/magnitude(znew));
+    results.phi = atan2(znew.y,znew.x);
+    if(magnitude(xnew) == 0)
+    {
+        results.psi = 0;
+        return results;
+    }
+    Math::Matrix<4,1> x = Math::quickColVector(1,0,0,1);
+    Math::Matrix<4,1> xprime = Math::rotateAboutY(results.theta)*Math::rotateAboutZ(results.phi)*x;
+    Point3d xprime4D(xprime[0],xprime[1],xprime[2]);
+
+    results.psi = acos(dotProduct(xprime4D, xnew));
+
+    if(dotProduct(crossProduct(xprime4D,xnew),znew)<0)
+    {
+        results.psi *= -1; // need to rotate CW rather than CCW
+    }
+
+    return results;
+}

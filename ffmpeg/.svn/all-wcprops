@@ -1,0 +1,155 @@
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg
+END
+RELEASE
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/RELEASE
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/LICENSE
+END
+.config
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/.config
+END
+ffmpeg.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/orbitframework/!svn/ver/55/branches/OrbitVisualizer/ffmpeg/ffmpeg.c
+END
+cmdutils_common_opts.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/cmdutils_common_opts.h
+END
+ffmpeg_filter.c
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/ffmpeg_filter.c
+END
+ffmpeg.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/ffmpeg.h
+END
+config.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/config.h
+END
+ffmpeg.pri
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/ffmpeg.pri
+END
+CREDITS
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/CREDITS
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/README
+END
+version.sh
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/version.sh
+END
+COPYING.GPLv2
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/COPYING.GPLv2
+END
+ffplay.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/ffplay.c
+END
+COPYING.GPLv3
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/COPYING.GPLv3
+END
+.version
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/.version
+END
+ffserver.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/ffserver.c
+END
+ffprobe.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/ffprobe.c
+END
+cmdutils.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/cmdutils.c
+END
+ffmpeg_opt.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/ffmpeg_opt.c
+END
+cmdutils.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/cmdutils.h
+END
+MAINTAINERS
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/MAINTAINERS
+END
+version.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/version.h
+END
+COPYING.LGPLv2.1
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/COPYING.LGPLv2.1
+END
+COPYING.LGPLv3
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/COPYING.LGPLv3
+END

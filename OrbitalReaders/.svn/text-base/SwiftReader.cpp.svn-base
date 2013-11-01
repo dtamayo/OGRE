@@ -1,0 +1,62 @@
+#include "SwiftReader.h"
+
+#define SEPARATOR "\\s*"
+#define DECIMAL_FIELD_REXP "([0-9\\.eE\\-\\+]*)"
+
+SwiftReader::SwiftReader(QString filename)
+    : lineParser(
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP
+        SEPARATOR DECIMAL_FIELD_REXP)
+{
+    if(filename.length() > 0)
+    {
+        QFile file(filename);
+        if (file.open(QFile::ReadOnly | QFile::Text))
+        {
+            QTextStream stream(&file);
+            readResults(stream);
+            file.close();
+        }
+    }
+}
+
+void SwiftReader::readResults(QTextStream& stream)
+{
+    QString line;
+    int lineNum = 0;
+    while (!stream.atEnd())
+    {
+        line = stream.readLine();
+        ++lineNum;
+        if (lineParser.exactMatch(line))
+        {
+            QStringList decimals = lineParser.capturedTexts();
+            Orbit d;
+            bool ok = true;
+            #define HANDLE_ERROR(index) \
+                if (!ok) { \
+                std::ostringstream os; \
+                os << "Could not decode decimal " << decimals.at(index).toAscii().data(); \
+                throw std::runtime_error(os.str()); \
+                }
+            d.time = decimals.at(1).toDouble(&ok); HANDLE_ERROR(1);
+            d.particleID = decimals.at(2).toDouble(&ok); HANDLE_ERROR(2);
+            d.axis = decimals.at(3).toDouble(&ok) * 25559; HANDLE_ERROR(3);
+            d.e = decimals.at(4).toDouble(&ok); HANDLE_ERROR(4);
+            d.i = decimals.at(5).toDouble(&ok); HANDLE_ERROR(5);
+            d.Omega = decimals.at(6).toDouble(&ok); HANDLE_ERROR(6);
+            d.w = decimals.at(7).toDouble(&ok); HANDLE_ERROR(7);
+            d.f = decimals.at(8).toDouble(&ok); HANDLE_ERROR(8);
+            d.hasOrbEls = true;
+            data[d.particleID].push_back(d);
+        }
+    }
+}

@@ -1,0 +1,24 @@
+//          Copyright Robert Douglas 2012
+// Distributed under the accompanying Software License, Version 1.0.
+//    (See accompanying file license.txt or copy at
+//          https://subversion.assembla.com/svn/rob_douglas_sandbox/trunk/license.txt)
+#ifndef ORBITAL_DATA_CSV_READER_H
+#define ORBITAL_DATA_CSV_READER_H
+
+#include "Orbit.h"
+
+#include <QtCore/QString>
+
+#include <vector>
+
+class OrbitalDataCSVReader
+{
+public:
+    OrbitalDataCSVReader(QString filename);
+    StaticDisplayOrbits const& getOrbits() const { return orbits; }
+
+private:
+    StaticDisplayOrbits orbits;
+};
+
+#endif

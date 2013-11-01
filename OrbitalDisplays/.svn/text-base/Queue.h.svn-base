@@ -1,0 +1,68 @@
+/*! @file Queue.h
+    @brief Class definition for RobD::Queue, which holds the actions added by the user at the bottom of the screen.  Also defines the Action struct used
+    by RobD::Queue and RobD::QueueActionDialog.
+*/
+
+#ifndef QUEUE_H
+#define QUEUE_H
+
+#include <QTableWidget>
+#include <QTableWIdgetItem>
+#include <QMenu>
+#include <QAction>
+#include <QHeaderView>
+
+#define NO_ACTION 0
+#define ROTATE 1
+#define ZOOM 2
+#define SIMULATE 3
+#define PAUSE 4
+#define INITIALIZE 5
+
+/*! @brief Structure for the various actions that can be chosen by the user to add to the queue.
+
+    Holds variables for all the possible actions.  When the user selects an action, only the appropriate members will be populated.
+    Other members will be garbage data.
+    "typ" determines the type of the action (see definitions in Queue.h).
+    "dFrame" is populated if the type is SIMULATE. It determines how many frames to simulate.
+    "frame" is the frame number of the simulation before this action is performed.
+    "span" is the number of frames over which this action will be performed.
+    "queueIndex" is the position of this action within the queue.
+    "dx", "dy", and "dz" are populated if the type is ROTATE. They determinee how many degrees to rotate around
+    the x, y, and z axis, respectively.
+    "newScale" is populated if the type is ZOOM. It determines the new zoom percentage.
+    "x", "y", and "z" are the rotation values before this action is performed.
+    "scale" is the zoom percentage before this action is performed.
+    "prevScale" is the zoom percentage before the previous action is performed.
+*/
+
+struct Action
+{
+    int typ, dFrame, frame, span, queueIndex;
+    double dx, dy, dz, newScale, x, y, z, scale, prevScale;
+};
+
+Q_DECLARE_METATYPE(Action)
+
+/*! @brief Queue to hold all the user-selected actions at the bottom of the screen.
+*/
+
+class Queue : public QTableWidget
+{
+    Q_OBJECT
+
+public:
+    Queue(int i, int j, QWidget* parent);
+    void addActionToQueue(Action act);
+    void updateStates(int i, int j);
+    void calculateNextState(Action a1, Action& a2);
+
+public slots:
+    void provideContextMenu(QPoint p);
+    void removeAction();
+
+private:
+    int rowToRemove;
+};
+
+#endif

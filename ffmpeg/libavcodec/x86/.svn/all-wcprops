@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86
+END
+cabac.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/cabac.h
+END
+dsputil_x86.h
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/dsputil_x86.h
+END
+diracdsp_mmx.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/diracdsp_mmx.h
+END
+mathops.h
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/mathops.h
+END
+constants.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/constants.h
+END
+h264_i386.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/h264_i386.h
+END
+idct_xvid.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/idct_xvid.h
+END
+fft.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/fft.h
+END
+dirac_dwt.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/dirac_dwt.h
+END
+vc1dsp.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/vc1dsp.h
+END
+vp56_arith.h
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/x86/vp56_arith.h
+END

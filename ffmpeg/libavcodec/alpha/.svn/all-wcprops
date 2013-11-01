@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/alpha
+END
+dsputil_alpha.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/alpha/dsputil_alpha.h
+END
+regdef.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/alpha/regdef.h
+END
+asm.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/alpha/asm.h
+END
+hpeldsp_alpha.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libavcodec/alpha/hpeldsp_alpha.h
+END

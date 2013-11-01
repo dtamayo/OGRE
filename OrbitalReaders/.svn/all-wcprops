@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/OrbitalReaders
+END
+DIReader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/orbitframework/!svn/ver/37/branches/OrbitVisualizer/OrbitalReaders/DIReader.cpp
+END
+SwiftReader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/orbitframework/!svn/ver/37/branches/OrbitVisualizer/OrbitalReaders/SwiftReader.cpp
+END
+DIReader.h
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/orbitframework/!svn/ver/41/branches/OrbitVisualizer/OrbitalReaders/DIReader.h
+END
+SwiftReader.h
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/orbitframework/!svn/ver/41/branches/OrbitVisualizer/OrbitalReaders/SwiftReader.h
+END
+OrbitalDataCSVReader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/orbitframework/!svn/ver/41/branches/OrbitVisualizer/OrbitalReaders/OrbitalDataCSVReader.cpp
+END
+OrbitalDataCSVReader.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/orbitframework/!svn/ver/41/branches/OrbitVisualizer/OrbitalReaders/OrbitalDataCSVReader.h
+END
+OrbitalReaders.pri
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/OrbitalReaders/OrbitalReaders.pri
+END

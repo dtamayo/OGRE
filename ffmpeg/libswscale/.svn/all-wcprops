@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libswscale
+END
+swscale_internal.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libswscale/swscale_internal.h
+END
+swscale.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libswscale/swscale.h
+END
+version.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libswscale/version.h
+END
+rgb2rgb.h
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/orbitframework/!svn/ver/51/branches/OrbitVisualizer/ffmpeg/libswscale/rgb2rgb.h
+END
