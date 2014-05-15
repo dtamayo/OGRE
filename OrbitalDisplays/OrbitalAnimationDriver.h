@@ -36,7 +36,7 @@
 #ifndef ORBITAL_ANIMATION_DRIVER_H
 #define ORBITAL_ANIMATION_DRIVER_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include <QtCore/QTimer>
 
@@ -47,14 +47,14 @@
 #include "Settings.h"
 #include "SettingsDialog.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QCheckBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFormLayout>
-#include <QtGui/QPushButton>
-#include <QtGui/QSlider>
-#include <QtGui/QSpinBox>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QVBoxLayout>
 #include <QtOpenGL/QGLFramebufferObject>
 
 #define FPS 24 // frames per second to be displayed in the application

@@ -48,7 +48,7 @@
 Queue::Queue(int rows, int columns, QWidget* parent) : QTableWidget(rows, columns, parent) {
     setColumnWidth(0, 210);
     QHeaderView* h = horizontalHeader();
-    h->setResizeMode(QHeaderView::Stretch);
+    h->setSectionResizeMode(QHeaderView::Stretch);
     setContextMenuPolicy(Qt::CustomContextMenu);
     QStringList headers;
     headers << "Action" << "Span" << "X Rotation" << "Y Rotation" << "Z Rotation"
