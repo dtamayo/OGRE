@@ -603,51 +603,13 @@ namespace Disp
     */
     void OrbitalAnimator::record(QTableWidget* queue) {
 
-        // first make a dialog to get the filename user wants to store movie in
-        QFileInfo savePath(QFileDialog::getSaveFileName(this, tr("Generate Movie..."), "", tr("MPEG-4 (*.mp4);; All Files (*)")));
-        if(savePath.fileName().compare(QString::QString(""), Qt::CaseSensitive) == 0) {    return; } // if the filename = "", then user hit cancel so we return
-        QString moviePath = savePath.absoluteFilePath(); // path including filename
-
-        QFile movieFile(moviePath);
-        movieFile.remove();
-        QDir dir = savePath.absoluteDir(); // parent directory
-        QString tmpFolderName = "orbpngtemp";
-
-        if(!dir.exists()) {
-            qWarning("The chosen directory does not exist");
-            return;
-        }
-
-        int ctr = 0; // number to put at the end of the temp folder.  If the
-                     // folder already exists, we try another number on end
-        int success = false;
-        while(!success) {
-            success = dir.mkdir(tmpFolderName + QString("%1").arg(++ctr)); // keep trying orbpngtemp with a different number at the end until you manage to make the dir
-        }
-
-        tmpPNGFolder = QDir::QDir(dir.absolutePath() + "/" + tmpFolderName + QString("%1").arg(ctr)); // once a valid name is found, make a QDir object for the temporary folder
+        // first make a dialog to get the folder wants to store images in
+        QString dirName = QFileDialog::getExistingDirectory(this, tr("Choose or create the folder to which you want images output"), qgetenv("HOME"), QFileDialog::ShowDirsOnly);
+        if(dirName.compare(QString::QString(""), Qt::CaseSensitive) == 0) {   return;  } // if the directory name = "", then user hit cancel so we return
+        QDir dir = QDir::QDir(dirName);
 
         recording = true;
         playbackQueue(queue);   // generate images
-        makeMovie(moviePath);            // make movie
-
-        // remove the temporary folder.  Qt has no built-in function to remove folders that have files in them
-        if (tmpPNGFolder.exists()) {
-            Q_FOREACH(QFileInfo info, tmpPNGFolder.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst)) {
-                if (info.isFile()) {
-                    success = QFile::remove(info.absoluteFilePath());
-                }
-                else {
-                    qWarning("Failed in removing temporary folder used to store still images");
-                    exit(1);
-                }
-                if (!success) {
-                    qWarning("Failed in removing temporary folder used to store still images");
-                    exit(1);
-                }
-            }
-            success = tmpPNGFolder.rmdir(tmpPNGFolder.absolutePath());
-        }
 
         recording = false;
         pictureNumber = 0;
