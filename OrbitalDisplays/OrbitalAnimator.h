@@ -59,7 +59,7 @@
 #include <stdexcept>
 
 extern "C" {
-#include "../ffmpeg/ffmpeg.h"
+// #include "../ffmpeg/ffmpeg.h"
 }
 
 #ifdef WIN32
@@ -169,7 +169,7 @@ namespace Disp
         void drawOrbitalNormal();
         template<Display> void drawStats();
         template<Display> void drawLoading();
-        void makeMovie(QString moviePath);
+        //void makeMovie(QString moviePath);
 
         // These functoins are meant to allow generalization of overlay painting
         // via whether they are painted to a pixmap, or directly to opengl

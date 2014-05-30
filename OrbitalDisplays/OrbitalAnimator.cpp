@@ -614,8 +614,8 @@ namespace Disp
         recording = false;
         pictureNumber = 0;
     }
-    /*! @brief stitches the movie out of individual frames using the ffmpeg library
-    */
+/*    /*! @brief stitches the movie out of individual frames using the ffmpeg library
+
     void OrbitalAnimator::makeMovie(QString moviePath)
     {
         int argc = 8;
@@ -644,7 +644,7 @@ namespace Disp
             exit(errorCode);
         }
     }
-
+*/
     /*! @brief Depending on whether the bool recording is true, either calls updateGL() or saveCurrentImage().
     */
     void OrbitalAnimator::updateOrRecord() {
