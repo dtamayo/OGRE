@@ -49,7 +49,7 @@
 #include "Queue.h"
 #include "OpenSimulationDialog.h"
 #include <QMenuBar>
-#include <QtWidgets/QFileDialog>
+#include <QtGui/QFileDialog>
 
 namespace Disp
 {

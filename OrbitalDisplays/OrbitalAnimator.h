@@ -47,7 +47,7 @@
 #include <QtOpenGL/QGLWidget>
 #include <QFileDialog>
 #include <QtGui/QPainter>
-#include <QtWidgets/QProgressDialog>
+#include <QtGui/QProgressDialog>
 #include <QtGui/QWheelEvent>
 #include <QFontMetrics>
 #include <QtOpenGL/QGLFramebufferObject>

@@ -37,7 +37,7 @@
 
 */
 
-#include <QtWidgets/QApplication>
+#include <QtGui/QApplication>
 #include "OrbitalDisplays/MainWindow.h"
 #include <iostream>
 
@@ -135,7 +135,7 @@ have already been added you can probably find what you need quickly by googling 
 for---if it doesn’t, you can probably modify or extend an existing Qt class to fit your needs. Keep in mind that if you want to use a new
 class in SettingsDialog.h, you must first include it at the top, e.g.,
 @code
-#include <QtWidgets/QDoubleSpinBox>
+#include <QtGui/QDoubleSpinBox>
 @endcode
 
 Once the widgets are defined, there are three steps that are done in member functions in SettingsDialog.cpp called internally by the

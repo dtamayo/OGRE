@@ -80,7 +80,7 @@ void SwiftReader::readResults(QTextStream& stream)
             #define HANDLE_ERROR(index) \
                 if (!ok) { \
                 std::ostringstream os; \
-                os << "Could not decode decimal " << decimals.at(index).toLatin1().data(); \
+                os << "Could not decode decimal " << decimals.at(index).toAscii().data(); \
                 throw std::runtime_error(os.str()); \
                 }
             d.time = decimals.at(1).toDouble(&ok); HANDLE_ERROR(1);
