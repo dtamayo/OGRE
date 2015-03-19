@@ -606,7 +606,7 @@ namespace Disp
         // first make a dialog to get the folder wants to store images in
         QString dirName = QFileDialog::getExistingDirectory(this, tr("Choose or create the folder to which you want images output"), qgetenv("HOME"), QFileDialog::ShowDirsOnly);
         if(dirName.compare(QString::QString(""), Qt::CaseSensitive) == 0) {   return;  } // if the directory name = "", then user hit cancel so we return
-        QDir dir = QDir::QDir(dirName);
+        tmpPNGFolder = QDir::QDir(dirName);
 
         recording = true;
         playbackQueue(queue);   // generate images
