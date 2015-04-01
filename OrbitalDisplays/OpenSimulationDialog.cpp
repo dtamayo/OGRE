@@ -39,8 +39,9 @@ OpenSimulationDialog::OpenSimulationDialog() : QDialog() {
     QVBoxLayout* mainLayout = new QVBoxLayout;
     QFormLayout* form = new QFormLayout;
     selectFileType = new QComboBox;
-    selectFileType->addItem("dI File", 0);
+    selectFileType->addItem("REBOUND File",0);
     selectFileType->addItem("SWIFT File", 0);
+    selectFileType->addItem("dI File", 0);
     selectDataType = new QComboBox;
     selectDataType->addItem("Orbital Elements");
     selectDataType->addItem("XYZ");

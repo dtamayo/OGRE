@@ -44,6 +44,7 @@
 #include "OrbitalReaders/DIReader.h"
 #include "OrbitalReaders/OrbitalDataCSVReader.h"
 #include "OrbitalReaders/SwiftReader.h"
+#include "OrbitalReaders/reboundreader.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
 
@@ -61,6 +62,13 @@
 
 namespace Disp
 {
+    enum integrator_code {
+        rebound,
+        swift,
+        dI,
+        not_set
+    };
+
     class OrbitalAnimator;
     class SliderSpinBoxPair; // should be removed
     /*!
@@ -82,6 +90,7 @@ namespace Disp
     {
         Q_OBJECT
     public:
+        integrator_code hashit (QString integrator);
         void setViewableArea(int w, int h);
         void setRotation(int xRot, int yRot, int zRot);
         void showFrame(int frameNumber);
