@@ -100,10 +100,21 @@ namespace Disp
         @ref opengl for a description of the functions used.
     */
     void OrbitalAnimator::initializeGL() {
-        glClearColor(0.0, 0.0, 0.0, 0.0);
         glEnable(GL_DEPTH_TEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        GLfloat values[2];
+        glGetFloatv (GL_LINE_WIDTH_GRANULARITY, values);
+        qDebug() << "GL_LINE_WIDTH_GRANULARITY value is " << values[0];
+        glGetFloatv (GL_LINE_WIDTH_RANGE, values);
+        qDebug() << "GL_LINE_WIDTH_RANGE values are " << values[0] << "and" << values[1];
+
+        glEnable(GL_LINE_SMOOTH);
         glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+        glLineWidth(3.5);
+
+        glClearColor(0.0, 0.0, 0.0, 0.0);
     }
 
     /*! @brief Resizes the OpenGL viewport
