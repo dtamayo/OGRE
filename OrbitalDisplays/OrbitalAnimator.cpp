@@ -102,11 +102,11 @@ namespace Disp
     void OrbitalAnimator::initializeGL() {
         glEnable(GL_DEPTH_TEST);
 
-        GLfloat values[2];
+        /*GLfloat values[2];
         glGetFloatv (GL_LINE_WIDTH_GRANULARITY, values);
         qDebug() << "GL_LINE_WIDTH_GRANULARITY value is " << values[0];
         glGetFloatv (GL_LINE_WIDTH_RANGE, values);
-        qDebug() << "GL_LINE_WIDTH_RANGE values are " << values[0] << "and" << values[1];
+        qDebug() << "GL_LINE_WIDTH_RANGE values are " << values[0] << "and" << values[1];*/
 
         glEnable(GL_LINE_SMOOTH);
         glEnable(GL_BLEND);

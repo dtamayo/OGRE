@@ -58,7 +58,7 @@ public:
     void osc2xyz();
     void checkElements();
 
-    double time, particleID, axis, e, i, Omega, w, f;
+    double time, particleID, axis, e, i, Omega, w, l, P, f;
     double mu;      // G * mass of central objects (needed in order to convert from xyz to osc)
 
     Eigen::Vector3d r;

@@ -85,54 +85,30 @@ namespace Disp
         orbitalAnimator->equatorialDataLoaded = true;
     }
 
-    /*! @brief Returns an enum for the passed integrator string to use in the setSimulationData switch statement
+    /*! @brief Reads in an input file.
 
-        OrbitalAnimationDriver.h has an enum for all the implemented input file formats.  This helper function takes a Qstring
-        (set when user selects an integrator in the open simulation dialog) and returns the appropriate code for use in
-        the switch statement in OrbitalAnimationDriver::setSimulationData.
+        Calls the appropriate <integrator>File() function, passing it the simulation data file name, which it gets when called by
+        Disp::MainWindow::openSimulation().  It also sets the maximum on the slider in the settings dialog that lets the user slide through the
+        simulation frames to the last frame in the simulation.
 
-        @sa @ref Disp::OrbitalAnimator::setSimulationData()
-      */
-    integrator_code OrbitalAnimationDriver::hashit(QString integrator){
-        if (integrator == "rebound") return rebound;
-        if (integrator == "swift") return swift;
-        if (integrator == "dI") return dI;
-
-        return not_set; // integrator wasn't set to one of the implemented formats
-    }
-
-    /*! @brief Reads in an input file
-
-        Calls updateSimulationCache to load the input file, selecting the appropriate integrator format.
+        @sa @ref Disp::dIFile::reboundFile()
       */
     void OrbitalAnimationDriver::setSimulationData(QString filename, QString fileType, QString dataType, bool b) {
         orbitalAnimator->setLoading(true);
         orbitalAnimator->updateGL(); // makes display show the "Loading" message after the loading flag is set on previous line
         orbitalAnimator->setFullOrbit(b);
-        switch(hashit(fileType)){
-            case rebound:{      // need curly brackets due to scope issue in C
-                ReboundReader reboundFile(filename);
-                orbitalAnimator->updateSimulationCache(reboundFile.getData());
-                }
-                break;
-            case swift:{
-                SwiftReader swiftFile(filename);
-                orbitalAnimator->updateSimulationCache(swiftFile.getData());
-                }
-                break;
-            case dI:{
-                DIReader dIFile(filename);
-                orbitalAnimator->updateSimulationCache(dIFile.getData());
-                }
-                break;
-            case not_set:
-                qDebug() << "Error loading input file.  Integrator type was not set";
-                break;
-            default:
-                qDebug() << "Error loading input file.  Not sure how we got this far!";
-                break;
+        if (fileType == "REBOUND File") {
+            ReboundReader reboundFile(filename);
+            orbitalAnimator->updateSimulationCache(reboundFile.getData());
         }
-
+        else if (fileType == "SWIFT File") {
+            SwiftReader swiftFile(filename);
+            orbitalAnimator->updateSimulationCache(swiftFile.getData());
+        }
+        else if (fileType == "dI File") {
+            DIReader dIFile(filename);
+            orbitalAnimator->updateSimulationCache(dIFile.getData());
+        }
         orbitalAnimator->simulationDataLoaded = true;
         orbitalAnimator->updateGL();
     }
