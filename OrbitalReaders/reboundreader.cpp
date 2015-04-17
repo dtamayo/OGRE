@@ -85,14 +85,14 @@ void ReboundReader::readResults(QTextStream& stream)
                 }
             d.particleID = decimals.at(1).toDouble(&ok); HANDLE_ERROR(2);
             d.time = decimals.at(2).toDouble(&ok); HANDLE_ERROR(1);
-            d.axis = decimals.at(3).toDouble(&ok) * 25559; HANDLE_ERROR(3);
+            d.axis = decimals.at(3).toDouble(&ok); HANDLE_ERROR(3);
             d.e = decimals.at(4).toDouble(&ok); HANDLE_ERROR(4);
-            d.i = decimals.at(5).toDouble(&ok); HANDLE_ERROR(5);
-            d.Omega = decimals.at(6).toDouble(&ok); HANDLE_ERROR(6);
-            d.w = decimals.at(7).toDouble(&ok); HANDLE_ERROR(7);
-            d.l = decimals.at(8).toDouble(&ok); HANDLE_ERROR(8);
+            d.i = 180./M_PI*decimals.at(5).toDouble(&ok); HANDLE_ERROR(5);
+            d.Omega = 180./M_PI*decimals.at(6).toDouble(&ok); HANDLE_ERROR(6);
+            d.w = 180./M_PI*decimals.at(7).toDouble(&ok); HANDLE_ERROR(7);
+            d.l = 180./M_PI*decimals.at(8).toDouble(&ok); HANDLE_ERROR(8);
             d.P = decimals.at(9).toDouble(&ok); HANDLE_ERROR(9);
-            d.f = decimals.at(10).toDouble(&ok); HANDLE_ERROR(10);
+            d.f = 180./M_PI*decimals.at(10).toDouble(&ok); HANDLE_ERROR(10);
             d.hasOrbEls = true;
             data[d.particleID].push_back(d);
         }

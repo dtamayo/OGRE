@@ -205,7 +205,11 @@ namespace Disp
 
         if (settings.displayMainOrbit() && simulationDataLoaded) {
             glPushMatrix();
-            if (drawFullOrbit) { /*drawOrbitalNormal();*/ drawOrbit(); }
+            if (drawFullOrbit) {
+                //drawOrbitalNormal();
+                //drawParticle();
+                drawOrbit();
+            }
             else { /*drawTrail();*/ drawParticle(); }
             glPopMatrix();
         }
@@ -282,37 +286,47 @@ namespace Disp
         Only works if Orbit::calculateOrbit() has been called on the particle.
     */
     void OrbitalAnimator::drawOrbit() {
-        glColor4f(settings.orbitalPlaneColor().red() / 255.,
-                  settings.orbitalPlaneColor().green() / 255.,
-                  settings.orbitalPlaneColor().blue() / 255.,
-                  settings.orbitalPlaneColor().alpha() / 255.);
-        glPushMatrix();
-        glRotatef(orbitData[0][currentIndex].Omega, 0, 0, 1);
-        glRotatef(orbitData[0][currentIndex].i, 1, 0, 0);
-        glRotatef(orbitData[0][currentIndex].w, 0, 0, 1);
-        glBegin(GL_POLYGON);
-        for (int f = 0; f < 360; ++f) {
-            glVertex3f(orbitData[0][currentIndex].orbitCoords[f].x,
-                       orbitData[0][currentIndex].orbitCoords[f].y,
-                       orbitData[0][currentIndex].orbitCoords[f].z);
-        }
-        glEnd();
+        int ctr = 0;
+        for (OrbitData::const_iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) { // iterate over particles
+            ctr++;
+            if(ctr != 4) { continue; }
 
-        glColor4f(settings.orbitColor().red() / 255.,
-                  settings.orbitColor().green() / 255.,
-                  settings.orbitColor().blue() / 255.,
-                  settings.orbitColor().alpha() / 255.);
-        glBegin(GL_LINE_STRIP);
-        for (int f = 0; f < 360; ++f) {
-            glVertex3f(orbitData[0][currentIndex].orbitCoords[f].x,
-                       orbitData[0][currentIndex].orbitCoords[f].y,
-                       orbitData[0][currentIndex].orbitCoords[f].z);
+            if ((size_t)currentIndex < (itr->second).size()) {
+                /*glColor4f(settings.orbitalPlaneColor().red() / 255.,
+                          settings.orbitalPlaneColor().green() / 255.,
+                          settings.orbitalPlaneColor().blue() / 255.,
+                          settings.orbitalPlaneColor().alpha() / 255.);
+                glPushMatrix();
+                glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
+                glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
+                glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                glBegin(GL_POLYGON);
+                for (int f = 0; f < 360; ++f) {
+                    glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
+                               (itr->second)[currentIndex].orbitCoords[f].y,
+                               (itr->second)[currentIndex].orbitCoords[f].z);
+                }
+                glEnd();*/
+
+                glColor4f(settings.orbitColor().red() / 255.,
+                          settings.orbitColor().green() / 255.,
+                          settings.orbitColor().blue() / 255.,
+                          settings.orbitColor().alpha() / 255.);
+                glBegin(GL_LINE_STRIP);
+                for (int f = 0; f < 360; ++f) {
+                    glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
+                               (itr->second)[currentIndex].orbitCoords[f].y,
+                               (itr->second)[currentIndex].orbitCoords[f].z);
+                    qDebug() << ctr << (itr->second)[currentIndex].orbitCoords[f].x << (itr->second)[currentIndex].orbitCoords[f].y << (itr->second)[currentIndex].orbitCoords[f].z;
+                }
+
+                glVertex3f((itr->second)[currentIndex].orbitCoords[0].x,
+                           (itr->second)[currentIndex].orbitCoords[0].y,
+                           (itr->second)[currentIndex].orbitCoords[0].z);
+                glEnd();
+                glPopMatrix();
+            }
         }
-        glVertex3f(orbitData[0][currentIndex].orbitCoords[0].x,
-                   orbitData[0][currentIndex].orbitCoords[0].y,
-                   orbitData[0][currentIndex].orbitCoords[0].z);
-        glEnd();
-        glPopMatrix();
     }
 
 /*
@@ -399,11 +413,13 @@ namespace Disp
             }
             if ((itr->second).size() > (size_t)simulationSize) simulationSize = (itr->second).size();
         }
+
         coordLength = std::max(ABS(maximum.x), std::max(ABS(maximum.y), std::max(ABS(maximum.z),
                                std::max(ABS(minimum.x), std::max(ABS(minimum.y), ABS(minimum.z))))));
         settingsDialog->setFrameRange(simulationSize);
         loading = false;
         updateGL();
+
     }
 
     /*! @brief Removes the equatorial orbits
