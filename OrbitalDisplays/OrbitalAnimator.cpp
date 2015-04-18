@@ -48,7 +48,7 @@ namespace Disp
         This constructor is called from OrbitalAnimationDriver::setupUI().  The OrbitalAnimator extends the QGLWidget class.
         The constructor initializes default values and prepares the arrays cosfs and sinfs.
     */
-    OrbitalAnimator::OrbitalAnimator(OrbitalAnimatorSettings& settings_, QWidget *parent/* = 0*/)
+    OrbitalAnimator::OrbitalAnimator(OrbitalAnimatorSettings& settings_, QWidget *parent)
         : QGLWidget(parent)
         , simulationDataLoaded(false)
         , equatorialDataLoaded(false)
