@@ -137,8 +137,8 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
 /*! @brief Adds all the user-selected values into the RobD::QueueActionDialog 's member variable act.  Called once the user clicks "Add" in the dialog.
 */
 void QueueActionDialog::setValues() {
-    act.span = act.typ == INITIALIZE ? 0 : span->value()*FPS;   // span = 0 if the action type is initialize, otherwise the value in the span widget
-                                                                // multiplied by the number of frames per second (span should hold # of frames, not sec)
+    act.span = act.typ == INITIALIZE ? 0 : span->value();   // span = 0 if the action type is initialize, otherwise the value in the span widget
+    qDebug() << act.span;
     act.queueIndex = act.typ == INITIALIZE ? 0 : insertRow->value();
     switch(act.typ) {
     case ROTATE: act.dx = first->value(); act.dy = second->value(); act.dz = third->value(); break;

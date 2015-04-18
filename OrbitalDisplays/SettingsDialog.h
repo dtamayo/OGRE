@@ -149,21 +149,13 @@ namespace Disp
     private:
 
         OrbitalAnimatorSettings& animatorSettings;
-
         QCheckBox* animate;
-
         QSpinBox* timeStep;
-
         QPushButton* centralBodyColorSelector;
-
         QPushButton* orbitalPlaneColorSelector;
-
         QPushButton* orbitColorSelector;
-
         QPushButton* rotator;
-
         QPushButton* zoomer;
-
         QPushButton* simulator;
 
         void setupUI();

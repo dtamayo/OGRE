@@ -69,8 +69,8 @@
 
 struct Action
 {
-    int typ, dFrame, frame, span, queueIndex;
-    double dx, dy, dz, newScale, x, y, z, scale, prevScale;
+    int typ, dFrame, frame, queueIndex;
+    double dx, dy, dz, span, newScale, x, y, z, scale, prevScale;
 };
 
 Q_DECLARE_METATYPE(Action)

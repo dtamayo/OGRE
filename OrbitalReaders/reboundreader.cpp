@@ -34,7 +34,7 @@
  https://subversion.assembla.com/svn/rob_douglas_sandbox/trunk/license.txt)
 */
 
-#include "reboundreader.h"
+#include "ReboundReader.h"
 
 #define SEPARATOR "\\s*"
 #define DECIMAL_FIELD_REXP "([0-9\\.eE\\-\\+]*)"

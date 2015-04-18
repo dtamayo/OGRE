@@ -527,9 +527,10 @@ namespace Disp
 
         This function zooms the simulation to "amt" over "time."
     */
-    void OrbitalAnimator::zoom(double amt, int time) {
+    void OrbitalAnimator::zoom(double amt, double time) {
+        int nFrames = int(time*FPS);
         double dz = (amt * scaleFactor - scaleFactor) / time;
-        for (int i=0; i < time; i++) {
+        for (int i=0; i < nFrames; i++) {
             scaleFactor += dz;
             settingsDialog->zoomScaleBox->setValue(scaleFactor);
             //settingsDialog->scrollZoom->setValue(scaleFactor * 100);
@@ -818,9 +819,9 @@ namespace Disp
         Connected in OrbitalAnimationDriver::makeConnections().
 
       This version should be used if zoom is changed to a slider.*/
-    void OrbitalAnimator::setZoomFactor(int zoom)
+    void OrbitalAnimator::setZoomFactor(double zoom)
     {
-        double f = (double)zoom;
+        double f = zoom;
         qDebug() << zoom;
         f = std::pow(10, zoom / 100.0);
         f = std::max(0.001, std::min(100000.0, f));

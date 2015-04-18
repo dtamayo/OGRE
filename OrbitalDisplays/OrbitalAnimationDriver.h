@@ -44,7 +44,7 @@
 #include "OrbitalReaders/DIReader.h"
 #include "OrbitalReaders/OrbitalDataCSVReader.h"
 #include "OrbitalReaders/SwiftReader.h"
-#include "OrbitalReaders/reboundreader.h"
+#include "OrbitalReaders/ReboundReader.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
 
@@ -58,7 +58,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtOpenGL/QGLFramebufferObject>
 
-#define FPS 24 // frames per second to be displayed in the application
+#define FPS 24. // frames per second to be displayed in the application
 
 namespace Disp
 {

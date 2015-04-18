@@ -37,7 +37,7 @@
 #ifndef ORBITAL_DATA_CSV_READER_H
 #define ORBITAL_DATA_CSV_READER_H
 
-#include "Orbit.h"
+#include "Helpers/Orbit.h"
 
 #include <QtCore/QString>
 

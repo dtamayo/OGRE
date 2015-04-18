@@ -5,10 +5,8 @@ HEADERS += OrbitalDisplays/Settings.h \
            OrbitalDisplays/MainWindow.h \
            OrbitalDisplays/OrbitalAnimator.h \
            OrbitalDisplays/QueueActionDialog.h \
-           OrbitalDisplays/Orbit.h \
-           OrbitalDisplays/OpenSimulationDialog.h \
-           OrbitalDisplays/Point3d.h \
-           OrbitalDisplays/GLDrawingFunctions.h
+           OrbitalDisplays/OpenSimulationDialog.h
+
 SOURCES += OrbitalDisplays/main.cpp \
            OrbitalDisplays/OrbitalAnimator.cpp \
            OrbitalDisplays/OrbitalAnimationDriver.cpp \
@@ -16,8 +14,5 @@ SOURCES += OrbitalDisplays/main.cpp \
            OrbitalDisplays/SettingsDialog.cpp \
            OrbitalDisplays/QueueActionDialog.cpp \
            OrbitalDisplays/Queue.cpp \
-           OrbitalDisplays/Orbit.cpp \
-           OrbitalDisplays/OpenSimulationDialog.cpp \
-           OrbitalDisplays/Point3d.cpp \
-           OrbitalDisplays/GLDrawingFunctions.cpp
+           OrbitalDisplays/OpenSimulationDialog.cpp
 

@@ -46,8 +46,8 @@
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
-#include "OrbitalDisplays/Point3d.h"
-#include "OrbitalDisplays/Orbit.h"
+#include "Helpers/Point3d.h"
+#include "Helpers/Orbit.h"
 
 class DIReader
 {

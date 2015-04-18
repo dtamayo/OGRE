@@ -36,13 +36,13 @@
 #ifndef ORBITAL_ANIMATOR_H
 #define ORBITAL_ANIMATOR_H
 
-#include "Point3d.h"
-#include "GLDrawingFunctions.h"
+#include "Helpers/Point3d.h"
+#include "Helpers/GLDrawingFunctions.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
 #include "QueueActionDialog.h"
 #include "OrbitalAnimationDriver.h"
-#include "Orbit.h"
+#include "Helpers/Orbit.h"
 #include "Transforms.hpp"
 #include <QtOpenGL/QGLWidget>
 #include <QFileDialog>
@@ -141,7 +141,7 @@ namespace Disp
         void setXRot(double deg);
         void setYRot(double deg);
         void setZRot(double deg);
-        void setZoomFactor(int zoom);
+        void setZoomFactor(double zoom);
         void rotate();
         void zoom();
         void simulate();
@@ -158,7 +158,7 @@ namespace Disp
         enum Display { Pixmap, OpenGL };
         void performAction(Action a);
         void rotate(double x, double y, double z, int t);
-        void zoom(double a, int t);
+        void zoom(double a, double t);
         void simulate(int a, int t);
         void doNothing(int t);
         void initialize(double x, double y, double z, double sc, int fr);
