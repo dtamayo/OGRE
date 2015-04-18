@@ -100,7 +100,16 @@ namespace Disp
         @ref opengl for a description of the functions used.
     */
     void OrbitalAnimator::initializeGL() {
+        glClearColor(0.0, 0.0, 0.0, 0.0);
         glEnable(GL_DEPTH_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-0.5, +0.5, -0.5, +0.5, 1.0, 40.0);
+        glMatrixMode(GL_MODELVIEW);
+        gluLookAt(0, 0, 30, 0, 0, 0, 0, 1, 0);
 
         /*GLfloat values[2];
         glGetFloatv (GL_LINE_WIDTH_GRANULARITY, values);
@@ -108,13 +117,11 @@ namespace Disp
         glGetFloatv (GL_LINE_WIDTH_RANGE, values);
         qDebug() << "GL_LINE_WIDTH_RANGE values are " << values[0] << "and" << values[1];*/
 
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_LINE_SMOOTH);      
         glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
         glLineWidth(3.5);
 
-        glClearColor(0.0, 0.0, 0.0, 0.0);
+
     }
 
     /*! @brief Resizes the OpenGL viewport
@@ -127,11 +134,6 @@ namespace Disp
     void OrbitalAnimator::resizeGL(int w, int h) {
         int newDim = std::min(w, h);
         glViewport(0, 0, (GLint)newDim, (GLint)newDim);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-0.5, +0.5, -0.5, +0.5, 1.0, 40.0);
-        glMatrixMode(GL_MODELVIEW);
-        gluLookAt(0, 0, 30, 0, 0, 0, 0, 1, 0);
     }
 
     /*! @brief Renders the scene
@@ -147,10 +149,13 @@ namespace Disp
     void OrbitalAnimator::paintGL() {
         glPushMatrix();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
         double orbitXScaleFactor = maximum.x - minimum.x;
         double orbitYScaleFactor = maximum.y - minimum.y;
         double orbitZScaleFactor = maximum.z - minimum.z;
-        double orbitScaleFactor = 1. / std::max(orbitXScaleFactor, std::max(orbitYScaleFactor, orbitZScaleFactor));
+        double maxscale = std::max(orbitXScaleFactor, std::max(orbitYScaleFactor, orbitZScaleFactor));
+        double orbitScaleFactor = ((maxscale==0) ? 1. : 1./maxscale);
+        //qDebug() << orbitScaleFactor << scaleFactor << scaleFactor * orbitScaleFactor;
         glScalef(scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor);
         glRotatef(-90, 1, 0, 0); // Change x-y orbital plane to x-z Display plane for display
         glRotatef(-90, 0, 0, 1);
@@ -289,7 +294,7 @@ namespace Disp
         int ctr = 0;
         for (OrbitData::const_iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) { // iterate over particles
             ctr++;
-            if(ctr != 4) { continue; }
+            //if(ctr != 4) { continue; }
 
             if ((size_t)currentIndex < (itr->second).size()) {
                 /*glColor4f(settings.orbitalPlaneColor().red() / 255.,
@@ -317,7 +322,7 @@ namespace Disp
                     glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
                                (itr->second)[currentIndex].orbitCoords[f].y,
                                (itr->second)[currentIndex].orbitCoords[f].z);
-                    qDebug() << ctr << (itr->second)[currentIndex].orbitCoords[f].x << (itr->second)[currentIndex].orbitCoords[f].y << (itr->second)[currentIndex].orbitCoords[f].z;
+                    //qDebug() << ctr << (itr->second)[currentIndex].orbitCoords[f].x << (itr->second)[currentIndex].orbitCoords[f].y << (itr->second)[currentIndex].orbitCoords[f].z;
                 }
 
                 glVertex3f((itr->second)[currentIndex].orbitCoords[0].x,
@@ -790,7 +795,7 @@ namespace Disp
         QString x = QString("X Rot (deg) : %1").arg(xrotation); // substitutes xrotation for %1
         QString y = QString("Y Rot (deg) : %1").arg(yrotation);
         QString z = QString("Z Rot (deg) : %1").arg(zrotation);
-        QString zoom = QString("Zoom : %1%").arg(scaleFactor * 100);
+        QString zoom = QString("Zoom Factor: %1").arg(scaleFactor);
         QString frame = QString("Frame Number : %1").arg(simulationDataLoaded ? currentIndex : 0);
         QFont f;
         f.setPointSize(16);
@@ -816,6 +821,7 @@ namespace Disp
     void OrbitalAnimator::setZoomFactor(int zoom)
     {
         double f = (double)zoom;
+        qDebug() << zoom;
         f = std::pow(10, zoom / 100.0);
         f = std::max(0.001, std::min(100000.0, f));
         scaleFactor = f;

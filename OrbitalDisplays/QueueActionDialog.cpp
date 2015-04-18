@@ -78,7 +78,7 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
         first = new QDoubleSpinBox;
         first->setRange(0.001, 5000);
         first->setValue(1);
-        formLayout->addRow("New Zoom Scale: ", first);
+        formLayout->addRow("New Zoom Factor: ", first);
         setWindowTitle("Zoom");
         break;
     case SIMULATE:
