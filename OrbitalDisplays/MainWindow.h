@@ -36,7 +36,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtDebug>
 #include <QMainWindow>
 #include <QMenu>
 #include <QAction>

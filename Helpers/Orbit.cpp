@@ -33,7 +33,7 @@
 */
 
 #include "Orbit.h"
-#include <QDebug>
+#include <QtCore/QDebug>
 #include <Geometry>
 #include <Dense>
 

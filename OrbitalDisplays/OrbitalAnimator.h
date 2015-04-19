@@ -43,7 +43,6 @@
 #include "QueueActionDialog.h"
 #include "OrbitalAnimationDriver.h"
 #include "Helpers/Orbit.h"
-//#include "Transforms.hpp"
 #include <QtOpenGL/QGLWidget>
 #include <QFileDialog>
 #include <QtGui/QPainter>
@@ -51,7 +50,7 @@
 #include <QtGui/QWheelEvent>
 #include <QFontMetrics>
 #include <QtOpenGL/QGLFramebufferObject>
-#include <QtDebug>
+#include <QtCore/QDebug>
 #include <QMessageBox>
 #include <sstream>
 #include <algorithm>

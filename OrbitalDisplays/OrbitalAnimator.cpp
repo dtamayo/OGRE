@@ -294,6 +294,7 @@ namespace Disp
         int ctr = 0;
         for (OrbitData::const_iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) { // iterate over particles
             ctr++;
+            glPushMatrix();
             //if(ctr != 4) { continue; }
 
             if ((size_t)currentIndex < (itr->second).size()) {
@@ -643,8 +644,8 @@ namespace Disp
 
         // first make a dialog to get the folder wants to store images in
         QString dirName = QFileDialog::getExistingDirectory(this, tr("Choose or create the folder to which you want images output"), qgetenv("HOME"), QFileDialog::ShowDirsOnly);
-        if(dirName.compare(QString::QString(""), Qt::CaseSensitive) == 0) {   return;  } // if the directory name = "", then user hit cancel so we return
-        tmpPNGFolder = QDir::QDir(dirName);
+        if(dirName.compare(QString(""), Qt::CaseSensitive) == 0) {   return;  } // if the directory name = "", then user hit cancel so we return
+        tmpPNGFolder = QDir(dirName);
 
         recording = true;
         playbackQueue(queue);   // generate images

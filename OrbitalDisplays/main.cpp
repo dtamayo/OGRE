@@ -40,11 +40,10 @@
 #include <QtWidgets/QApplication>
 #include "OrbitalDisplays/MainWindow.h"
 #include <iostream>
-#include <QDebug>
+#include <QtCore/QDebug>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 //#include <QCoreApplication>
-#include <QDebug>
 #include <QString>
 #include <QStringList>
 

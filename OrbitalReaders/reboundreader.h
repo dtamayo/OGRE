@@ -5,7 +5,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
-#include <QtDebug>
+#include <QtCore/QDebug>
 #include <vector>
 #include <sstream>
 #include <fstream>
