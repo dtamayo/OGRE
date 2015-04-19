@@ -138,7 +138,6 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
 */
 void QueueActionDialog::setValues() {
     act.span = act.typ == INITIALIZE ? 0 : span->value();   // span = 0 if the action type is initialize, otherwise the value in the span widget
-    qDebug() << act.span;
     act.queueIndex = act.typ == INITIALIZE ? 0 : insertRow->value();
     switch(act.typ) {
     case ROTATE: act.dx = first->value(); act.dy = second->value(); act.dz = third->value(); break;

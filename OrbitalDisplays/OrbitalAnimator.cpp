@@ -56,7 +56,7 @@ namespace Disp
         , settings(settings_)
         , currentIndex(0)
         , simulationSize(0)
-        , scaleFactor(1)
+        , scaleFactor(1.)
         , xrotation(0)
         , yrotation(0)
         , zrotation(0)
@@ -529,13 +529,18 @@ namespace Disp
     */
     void OrbitalAnimator::zoom(double amt, double time) {
         int nFrames = int(time*FPS);
-        double dz = (amt * scaleFactor - scaleFactor) / time;
-        for (int i=0; i < nFrames; i++) {
+        double dz = (amt - scaleFactor) / (nFrames - 1.); //(amt * scaleFactor - scaleFactor) / time;
+        for (int i=0; i < nFrames-1; i++) {
             scaleFactor += dz;
-            settingsDialog->zoomScaleBox->setValue(scaleFactor);
+            settingsDialog->zoomScaleSlider->setDoubleValue(log10(scaleFactor));
             //settingsDialog->scrollZoom->setValue(scaleFactor * 100);
             updateOrRecord();
         }
+
+        // do last step manually to ensure we reach specified scaleFactor at the end
+        settingsDialog->zoomScaleSlider->setDoubleValue(log10(amt));
+        scaleFactor = amt;
+        updateOrRecord();
     }
 
     /*! @brief Plays the simulation
@@ -575,7 +580,7 @@ namespace Disp
         //settingsDialog->xRotationBox->setValue(xrotation);
         //settingsDialog->yRotationBox->setValue(yrotation);
         //settingsDialog->zRotationBox->setValue(zrotation);
-        settingsDialog->zoomScaleBox->setValue(scaleFactor);
+        settingsDialog->zoomScaleSlider->setDoubleValue(log10(scaleFactor));
         settingsDialog->scrollTimeIndex->setValue(currentIndex);
         settingsDialog->timeIndex->setValue(currentIndex);
         updateOrRecord();
@@ -700,7 +705,7 @@ namespace Disp
         if (numSteps < 0) scaleFactor *= pow(.8, -numSteps);
         else scaleFactor *= pow(1.25, numSteps);
 
-        settingsDialog->zoomScaleBox->setValue(scaleFactor);
+        settingsDialog->zoomScaleSlider->setDoubleValue(log10(scaleFactor));
         updateGL();
     }
 
@@ -816,16 +821,11 @@ namespace Disp
 
     /*! @brief SLOT executed when zoom is changed in the SettingsDialog.
 
-        Connected in OrbitalAnimationDriver::makeConnections().
-
-      This version should be used if zoom is changed to a slider.*/
+        Connected in OrbitalAnimationDriver::makeConnections().*/
     void OrbitalAnimator::setZoomFactor(double zoom)
     {
-        double f = zoom;
-        qDebug() << zoom;
-        f = std::pow(10, zoom / 100.0);
-        f = std::max(0.001, std::min(100000.0, f));
-        scaleFactor = f;
+        zoom = std::max(0.001, std::min(100000.0, zoom));
+        scaleFactor = zoom;
         updateGL();
     }
 

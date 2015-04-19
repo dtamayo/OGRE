@@ -36,6 +36,7 @@
 */
 
 #include "SettingsDialog.h"
+#include <math.h>
 
 /*! @brief main namespace for the project
 */
@@ -51,6 +52,11 @@ namespace Disp
         setupUI();
         layoutControls();
         makeConnections();
+    }
+
+    void SettingsDialog::calcZoomFactor(double value)
+    {
+        emit setZoomFactor(pow(10.,value));
     }
 
     void SettingsDialog::setFrame(int fn)
@@ -127,11 +133,13 @@ namespace Disp
         zRotationBox->setRange(-180, 180);
         zRotationBox->setMaximumSize(70, 50);
         */
-        zoomScaleBox = new QSlider(this);
-        zoomScaleBox->setRange(-400, 400);
-        zoomScaleBox->setValue(0);
-        zoomScaleBox->setOrientation(Qt::Horizontal);
-        zoomScaleBox->setMaximumSize(70, 50);
+        double ndecimals = 2.;                          // number of decimals for zoom slider
+        int zoomOOM = 3;                            // maximum orders of magnitude to zoom by
+        zoomScaleSlider = new DoubleSlider(this, ndecimals);
+        zoomScaleSlider->setRange(-zoomOOM*pow(10.,ndecimals), zoomOOM*pow(10.,ndecimals)); // DoubleSlider implicitly stores int, so have to * ndecimals
+        zoomScaleSlider->setDoubleValue(0.);
+        zoomScaleSlider->setOrientation(Qt::Horizontal);
+        zoomScaleSlider->setMaximumSize(70, 50);
         //scrollZoom = new QSlider(this);
         //scrollZoom->setOrientation(Qt::Horizontal);
         //scrollZoom->setRange(1, 1000000);
@@ -218,7 +226,7 @@ namespace Disp
         //controlLayout->addRow("X Rotation", xRotationBox);
         //controlLayout->addRow("Y Rotation", yRotationBox);
         //controlLayout->addRow("Z Rotation", zRotationBox);
-        controlLayout->addRow("Zoom Factor", zoomScaleBox);
+        controlLayout->addRow("Zoom Factor", zoomScaleSlider);
         //controlLayout->addRow("Scroll Zoom", scrollZoom);
         controlLayout->addRow("Scroll Time", scrollTimeIndex);
         controlLayout->addRow("Frame Number", timeIndex);
@@ -254,7 +262,7 @@ namespace Disp
         connect(yRotationBox, SIGNAL(valueChanged(double)), this, SIGNAL(setYRot(double)));
         connect(zRotationBox, SIGNAL(valueChanged(double)), this, SIGNAL(setZRot(double)));
 */
-        connect(zoomScaleBox, SIGNAL(valueChanged(int)), this, SIGNAL(setZoomFactor(int)));
+        connect(zoomScaleSlider, SIGNAL(doubleValueChanged(double)), this, SLOT(calcZoomFactor(double)));
         //connect(scrollZoom, SIGNAL(valueChanged(int)), this, SIGNAL(setZoomFactor(int)));
 
         connect(animate, SIGNAL(clicked(bool)), this, SIGNAL(handleAnimateChecked(bool)));

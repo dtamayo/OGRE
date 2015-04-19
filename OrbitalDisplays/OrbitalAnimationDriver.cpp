@@ -194,7 +194,7 @@ namespace Disp
         connect(orbitalAnimator->settingsDialog, SIGNAL(setXRot(double)), orbitalAnimator, SLOT(setXRot(double)));
         connect(orbitalAnimator->settingsDialog, SIGNAL(setYRot(double)), orbitalAnimator, SLOT(setYRot(double)));
         connect(orbitalAnimator->settingsDialog, SIGNAL(setZRot(double)), orbitalAnimator, SLOT(setZRot(double)));
-        connect(orbitalAnimator->settingsDialog, SIGNAL(setZoomFactor(int)), orbitalAnimator, SLOT(setZoomFactor(int)));
+        connect(orbitalAnimator->settingsDialog, SIGNAL(setZoomFactor(double)), orbitalAnimator, SLOT(setZoomFactor(double)));
         connect(orbitalAnimator->settingsDialog, SIGNAL(rotate()), orbitalAnimator, SLOT(rotate()));
         connect(orbitalAnimator->settingsDialog, SIGNAL(zoom()), orbitalAnimator, SLOT(zoom()));
         connect(orbitalAnimator->settingsDialog, SIGNAL(simulate()), orbitalAnimator, SLOT(simulate()));

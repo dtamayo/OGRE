@@ -41,7 +41,7 @@
     The top of each column is labeled with a header.
     Rows in the table correspond with actions in the queue.
     To begin with, one action is added to the queue - initialize.
-    By default, the values for this action are standard - Rotate(0, 0, 0), Zoom 100%, frame 0.
+    By default, the values for this action are standard - Rotate(0, 0, 0), Zoom 1, frame 0.
 
 */
 
@@ -148,8 +148,8 @@ void Queue::addActionToQueue(Action action) {
         text = QString("Rotate (%1, %2, %3) degrees").arg(x, y, z);
         break;
     case ZOOM:
-        sc = QString::number(action.newScale * 100);
-        text = QString("Zoom to %1%").arg(sc);
+        sc = QString::number(action.newScale);
+        text = QString("Zoom to %1").arg(sc);
         break;
     case SIMULATE:
         fr = QString::number(action.dFrame);
