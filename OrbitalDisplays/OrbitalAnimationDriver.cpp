@@ -97,15 +97,15 @@ namespace Disp
         orbitalAnimator->setLoading(true);
         orbitalAnimator->updateGL(); // makes display show the "Loading" message after the loading flag is set on previous line
         orbitalAnimator->setFullOrbit(b);
-        if (fileType == "REBOUND File") {
+        if (QString::compare(fileType,QString("Rebound"),Qt::CaseInsensitive) == 0) {
             ReboundReader reboundFile(filename);
             orbitalAnimator->updateSimulationCache(reboundFile.getData());
         }
-        else if (fileType == "SWIFT File") {
+        else if (QString::compare(fileType,QString("SWIFT"),Qt::CaseInsensitive) == 0) {
             SwiftReader swiftFile(filename);
             orbitalAnimator->updateSimulationCache(swiftFile.getData());
         }
-        else if (fileType == "dI File") {
+        else if (QString::compare(fileType,QString("dI"),Qt::CaseInsensitive) == 0) {
             DIReader dIFile(filename);
             orbitalAnimator->updateSimulationCache(dIFile.getData());
         }
