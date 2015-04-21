@@ -66,6 +66,9 @@ namespace Disp
         , pictureNumber(0)
         , trailLength(60)
         , drawFullOrbit(false)
+        , fillOrbits(false)
+        , drawParticles(true)
+        , drawOrbitNormals(false)
     {
         QFont newFont(font());
         newFont.setPointSize(30);
@@ -211,11 +214,14 @@ namespace Disp
         if (settings.displayMainOrbit() && simulationDataLoaded) {
             glPushMatrix();
             if (drawFullOrbit) {
-                //drawOrbitalNormal();
-                //drawParticle();
                 drawOrbit();
             }
-            else { /*drawTrail();*/ drawParticle(); }
+            if (drawParticles) {
+                drawParticle();
+            }
+            if (drawOrbitNormals) {
+                drawOrbitalNormal();
+            }
             glPopMatrix();
         }
 /*
@@ -291,28 +297,27 @@ namespace Disp
         Only works if Orbit::calculateOrbit() has been called on the particle.
     */
     void OrbitalAnimator::drawOrbit() {
-        int ctr = 0;
         for (OrbitData::const_iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) { // iterate over particles
-            ctr++;
             glPushMatrix();
-            //if(ctr != 4) { continue; }
 
             if ((size_t)currentIndex < (itr->second).size()) {
-                /*glColor4f(settings.orbitalPlaneColor().red() / 255.,
+                if(fillOrbits){
+                    glColor4f(settings.orbitalPlaneColor().red() / 255.,
                           settings.orbitalPlaneColor().green() / 255.,
                           settings.orbitalPlaneColor().blue() / 255.,
                           settings.orbitalPlaneColor().alpha() / 255.);
-                glPushMatrix();
-                glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
-                glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
-                glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
-                glBegin(GL_POLYGON);
-                for (int f = 0; f < 360; ++f) {
-                    glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
+
+                    glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
+                    glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
+                    glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                    glBegin(GL_POLYGON);
+                    for (int f = 0; f < 360; ++f) {
+                        glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
                                (itr->second)[currentIndex].orbitCoords[f].y,
                                (itr->second)[currentIndex].orbitCoords[f].z);
+                    }
+                    glEnd();
                 }
-                glEnd();*/
 
                 glColor4f(settings.orbitColor().red() / 255.,
                           settings.orbitColor().green() / 255.,
@@ -335,7 +340,7 @@ namespace Disp
         }
     }
 
-/*
+
     void OrbitalAnimator::drawOrbitalNormal()
     {
         glColor4f(settings.orbitColor().red() / 255.,
@@ -344,7 +349,7 @@ namespace Disp
                   settings.orbitColor().alpha() / 255.);
         drawVector(normals[currentIndex] * normalsScalar);
     }
-*/
+
 
     /*! @brief Calls Orbit::calculateOrbit() on all the particles in eclipticOrbits
 

@@ -106,6 +106,9 @@ namespace Disp
 
         QSize sizeHint() const { return QSize(800, 550); }
         void setFullOrbit(bool b) { drawFullOrbit = b; }
+        void setdrawParticles(bool b) { drawParticles = b; }
+        void setFillOrbits(bool b) { fillOrbits = b; }
+        void setdrawOrbitNormals(bool b) { drawOrbitNormals = b; }
         void setZoom(double zoomPercent) { scaleFactor = zoomPercent; updateGL(); }
         void updateOrRecord();
         void saveCurrentImage(int id);
@@ -201,6 +204,10 @@ namespace Disp
         int pictureNumber;
         int trailLength;
         bool drawFullOrbit;
+        bool fillOrbits;
+        bool drawParticles;
+        bool drawOrbitNormals;
+
     };
 } // namespace Disp
 
