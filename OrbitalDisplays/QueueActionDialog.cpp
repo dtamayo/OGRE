@@ -89,9 +89,6 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
         break;
     case PAUSE:
         setWindowTitle("Pause");
-        first = new QDoubleSpinBox;
-        first->setRange(0,1000);
-        formLayout->addRow("Pause duration (sec): ", first);
         break;
     case INITIALIZE:
         setWindowTitle("Initialize");
@@ -116,7 +113,7 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
         formLayout->addRow("Zoom scale: ", fourth);
         formLayout->addRow("Frame Number: ", fifth);
     }
-    if (act.typ != NO_ACTION && act.typ != INITIALIZE) { // if NO_ACTION or INITIALIZE, don't need to define the timespan or ask where to insert the action
+    if (act.typ != INITIALIZE) { // INITIALIZE doesn't need to define the timespan or ask where to insert the action
         span = new QDoubleSpinBox;
         span->setRange(0.001, 1000);
         span->setMinimumWidth(81);

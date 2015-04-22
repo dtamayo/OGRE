@@ -554,16 +554,15 @@ namespace Disp
         This function increases the frame number of the simulation by "amt" over "time."
     */
     void OrbitalAnimator::simulate(int amt, int time) {
-        int remainder = amt % time;
-        int ds = (amt - remainder) / time;
-        for (int i=0; i < time; i++) {
-            currentIndex += ds;
+        int nFrames = int(time*FPS); // number of frames we need to create
+        double deltaFrame = amt/double(nFrames-1.);
+        int indexInitial = currentIndex;
+        for (int i=0; i < nFrames; i++) {
+            currentIndex = int(round(indexInitial + i*deltaFrame));
             settingsDialog->scrollTimeIndex->setValue(currentIndex);
             settingsDialog->timeIndex->setValue(currentIndex);
             updateOrRecord();
         }
-        currentIndex += remainder;
-        if (remainder != 0) updateOrRecord();
     }
 
     /*! @brief Pauses the simulation

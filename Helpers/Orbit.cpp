@@ -36,6 +36,7 @@
 #include <QtCore/QDebug>
 #include <Geometry>
 #include <Dense>
+#include <math.h>
 
 #define PRECISION 1e-14
 
@@ -140,30 +141,30 @@ void Orbit::osc2xyz()
 
 void Orbit::xyz2osc()
 {
-    Eigen::Vector3d h = r.cross(v);
+	Eigen::Vector3d h = r.cross(v);
 
-    //DOESN'T CONSIDER CASE OF RADIAL ORBIT i.e. h = 0
+	//DOESN'T CONSIDER CASE OF RADIAL ORBIT i.e. h = 0
 
-    // Now calculate components of P = (v^2r - mu)rhat - (v dot r)v
-    // First calculate A = (v^2r - mu)/r = v^2 - mu/r and B = v dot r
+	// Now calculate components of P = (v^2r - mu)rhat - (v dot r)v
+	// First calculate A = (v^2r - mu)/r = v^2 - mu/r and B = v dot r
 
-    double A = v.squaredNorm() - mu / r.norm();
+	double A = v.squaredNorm() - mu / r.norm();
 
-    double B = v.dot(r);
+	double B = v.dot(r);
 
-    Eigen::Vector3d P = A*r - B*v;
+	Eigen::Vector3d P = A*r - B*v;
 
-    e = P.norm()/mu;
+	e = P.norm()/mu;
 
-    axis = h.squaredNorm() / ( mu * (1 - pow(e, 2)));
+	axis = h.squaredNorm() / ( mu * (1 - pow(e, 2)));
 
-    i = acos(h(2)/h.norm());
+	i = acos(h(2)/h.norm());
 
-    i = RadToDeg(i);// convert to degrees
+	i = RadToDeg(i);// convert to degrees
 
-    if(fabs(i) < PRECISION)
-    {
-        Omega = 0;
+	if(fabs(i) < PRECISION)
+	{
+		Omega = 0;
     }
     else
     {

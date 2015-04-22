@@ -430,7 +430,7 @@ namespace Disp {
         actionSelectorButton->addItem(tr("Rotate"), 0);
         actionSelectorButton->addItem(tr("Zoom"), 0);
         actionSelectorButton->addItem(tr("Simulate"), 0);
-        actionSelectorButton->addItem(tr("Do Nothing"), 0);
+        actionSelectorButton->addItem(tr("Pause"), 0);
         actionSelectorButton->addItem(tr("Initialize"), 0);
     }
 
