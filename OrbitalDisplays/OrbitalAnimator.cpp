@@ -123,8 +123,6 @@ namespace Disp
         glEnable(GL_LINE_SMOOTH);      
         glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
         glLineWidth(3.5);
-
-
     }
 
     /*! @brief Resizes the OpenGL viewport
