@@ -105,7 +105,7 @@ namespace Disp
         OrbitalAnimatorSettings animatorSettings;
 
     public slots:
-        void performAction(QTableWidgetItem* a);
+        //void performAction(QTableWidgetItem* a);
 
     private slots:
         void handleAnimateChecked(bool val);

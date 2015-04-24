@@ -125,7 +125,7 @@ namespace Disp
         void clearEclipticData();
         void clearAllData();
         void setLoading(bool b) { loading = b; }
-        void checkAndPerformAction(QTableWidgetItem* a);
+        //void performIntermediateAction(QTableWidgetItem* a);
         void playbackQueue(QTableWidget* queue);
         void record(QTableWidget* queue);
         double getXRotation() { return xrotation; }

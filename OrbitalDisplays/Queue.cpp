@@ -148,32 +148,32 @@ void Queue::addActionToQueue(Action action) {
 void Queue::updateQueue(int start, int end) {
     for (int i = start; i < end; i++) {
         QVariant v2 = item(i, 0)->data(Qt::UserRole);
-        Action a2 = v2.value<Action>();
+        Action act = v2.value<Action>();
 
-        if(a2.typ != INITIALIZE){
+        if(act.typ != INITIALIZE){
             QVariant v1 = item(i - 1, 0)->data(Qt::UserRole);
-            Action a1 = v1.value<Action>();
-            syncAction(a1, a2);
+            Action prevAct = v1.value<Action>();
+            syncAction(prevAct, act);
 
-            if(a2.frame < a1.frame){
-                a2.frame = a1.frame;
+            if(act.frame < prevAct.frame){
+                act.frame = prevAct.frame;
             }
         }
 
         QString text, x, y, z, sc, fr;
-        switch (a2.typ) {
+        switch (act.typ) {
         case ROTATE:
-            x = QString::number(a2.xrot);
-            y = QString::number(a2.yrot);
-            z = QString::number(a2.zrot);
+            x = QString::number(act.xrot);
+            y = QString::number(act.yrot);
+            z = QString::number(act.zrot);
             text = QString("Rot. to (%1, %2, %3)").arg(x, y, z);
             break;
         case ZOOM:
-            sc = QString::number(a2.scale);
+            sc = QString::number(act.scale);
             text = QString("Zoom to %1").arg(sc);
             break;
         case SIMULATE:
-            fr = QString::number(a2.frame);
+            fr = QString::number(act.frame);
             text = QString("Sim. to frame %1").arg(fr);
             break;
         case PAUSE:
@@ -184,15 +184,15 @@ void Queue::updateQueue(int start, int end) {
             break;
         }
 
-        a2.queueIndex = i;
-        v2.setValue(a2);
+        act.queueIndex = i;
+        v2.setValue(act);
         item(i, 0)->setData(Qt::UserRole, v2);
         item(i, 0)->setText(text);
 
-        text = QString::number(a2.span);
+        text = QString::number(act.span);
         item(i, 1)->setText(text);
 
-        std::vector<QString> strings = getStateStrings(a2);
+        std::vector<QString> strings = getStateStrings(act);
         for (int j=0; j < 5; j++) item(i, j + 2)->setText(strings[j]);
     }
 }

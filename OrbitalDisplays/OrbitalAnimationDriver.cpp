@@ -175,9 +175,9 @@ namespace Disp
 
     int OrbitalAnimationDriver::getSimulationSize() { return orbitalAnimator->getSimulationSize(); }
 
-    void OrbitalAnimationDriver::performAction(QTableWidgetItem* a) {
-        if (a->column() == 0) orbitalAnimator->checkAndPerformAction(a);
-    }
+    /*void OrbitalAnimationDriver::performAction(QTableWidgetItem* a) {
+        if (a->column() == 0) orbitalAnimator->performAction(a);
+    }*/
 
     void OrbitalAnimationDriver::layoutControls()
     {

@@ -583,8 +583,8 @@ namespace Disp {
         connect(dispCoords, SIGNAL(triggered()), this, SLOT(displayCoords()));
         connect(dispMainOrbit, SIGNAL(triggered()), this, SLOT(displayMainOrbit()));
         connect(dispSpinAxis, SIGNAL(triggered()), this, SLOT(displaySpinAxis()));
-        connect(queue, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
-                driver, SLOT(performAction(QTableWidgetItem*)));
+        /*connect(queue, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
+                driver, SLOT(performAction(QTableWidgetItem*)));*/
         connect(queue, SIGNAL(customContextMenuRequested(QPoint)), queue, SLOT(provideContextMenu(QPoint)));
         connect(playbackButton, SIGNAL(clicked()), this, SLOT(playbackQueue()));
         connect(recordButton, SIGNAL(clicked()), this, SLOT(record()));

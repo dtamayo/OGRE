@@ -511,18 +511,21 @@ namespace Disp
 
         This function rotates the simulation by (x, y, z) over "time."
     */
-    void OrbitalAnimator::rotate(double x, double y, double z, int time) {
-        double t = (double)time;
-        double dx = x / t;
-        double dy = y / t;
-        double dz = z / t;
-        for (int i=0; i < time; i++) {
+    void OrbitalAnimator::rotate(double xrot, double yrot, double zrot, int time) {
+        int nFrames = int(time*FPS);
+        double dxrot = (xrot-xrotation) / (nFrames - 1.);
+        double dyrot = (yrot-yrotation) / (nFrames - 1.);
+        double dzrot = (zrot-zrotation) / (nFrames - 1.);
+
+        // NEED TO THINK ABOUT HOW TO DO A ROTATION IF IT WRAPS AROUND 360 (IMPLEMENTED CURRENTLY USING DX RATHER THAN ABSOLUTE VALUES, BUT THEN WE CAN't USE TRICK IN ZOOM TO ENSURE WE END UP AT THE SPOT WE WANT EXACTLY
+
+        for (int i=0; i < nFrames-1; i++) {
             setNewRotation(xrotation, dx);
             setNewRotation(yrotation, dy);
             setNewRotation(zrotation, dz);
-            //settingsDialog->xRotationBox->setValue(xrotation);
-            //settingsDialog->yRotationBox->setValue(yrotation);
-            //settingsDialog->zRotationBox->setValue(zrotation);
+            settingsDialog->xRotationBox->setValue(xrotation);
+            settingsDialog->yRotationBox->setValue(yrotation);
+            settingsDialog->zRotationBox->setValue(zrotation);
             updateOrRecord();
         }
     }
@@ -591,25 +594,33 @@ namespace Disp
 
     /*! @brief Executes an action
 
-        This function takes in an Action (defined in Queue.h) and executes it in the simulation.
+        This function takes in an Action (defined in Queue.h) and executes it in the simulation
+        (from the current state).
     */
     void OrbitalAnimator::performAction(Action act) {
         switch (act.typ) {
-        case ROTATE: rotate(act.dxrot, act.dyrot, act.dzrot, act.span); break;
+        case ROTATE: rotate(act.xrot, act.yrot, act.zrot, act.span); break;
         case ZOOM: zoom(act.scale, act.span); break;
-        case SIMULATE: simulate(act.dFrame, act.span); break;
+        case SIMULATE: simulate(act.frame, act.span); break;
         case PAUSE: doNothing(act.span); break;
         case INITIALIZE: initialize(act.xrot, act.yrot, act.zrot, act.scale, act.frame);
         }
     }
 
-    /*! @brief Sets the simulation to the correct state, then performs the action
+/* Need a way to access previous queue action to set state or store previous values
+ * for each action in order to do this.  If you want, you'd then uncomment the signal/slot
+ * connection in MainWindow::makeConnections between itemDoubleClicked and the slot in
+ * OrbitalAnimationDriver (which should also be commented out)
+ *
+! @brief Sets the simulation to a given action's state, then performs the action
 
-        This function sets the simulation to the state stored in the Action and then performs the action.
-    */
-    void OrbitalAnimator::checkAndPerformAction(QTableWidgetItem* item) {
+        This function sets the simulation to the state at the end of the previous action
+        and then performs the passed action.
+
+    void OrbitalAnimator::performIntermediateAction(QTableWidgetItem* item) {
         QVariant v = item->data(Qt::UserRole);
         Action act = v.value<Action>();
+
         double x = act.xrot, y = act.yrot, z = act.zrot, sc = act.scale, fr = act.frame;
         switch (act.typ) {
         case ROTATE:
@@ -627,6 +638,7 @@ namespace Disp
         if (act.typ != 4) initialize(x, y, z, sc, fr);
         performAction(act);
     }
+*/
 
     /*! @brief Iterates through queue and calls Disp::OrbitalAnimator::performAction() on each item.
     */
