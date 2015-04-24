@@ -56,9 +56,9 @@ Queue::Queue(int rows, int columns, QWidget* parent) : QTableWidget(rows, column
     setHorizontalHeaderLabels(headers);
     Action act;
     act.typ = INITIALIZE;
-    act.x = 0;
-    act.y = 0;
-    act.z = 0;
+    act.xrot = 0;
+    act.yrot = 0;
+    act.zrot = 0;
     act.scale = 1;
     act.frame = 0;
     act.span = 0;
@@ -66,45 +66,19 @@ Queue::Queue(int rows, int columns, QWidget* parent) : QTableWidget(rows, column
     addActionToQueue(act);
 }
 
-/*! @brief Used for calculating the state of the simulation after the action a1 is performed.
 
-    The current state of the simulation is changed according to action a1.
-    The resulting values are placed into action a2.
-
-*/
-void Queue::calculateNextState(Action a1, Action &a2) {
-    a2.x = a1.x;
-    a2.y = a1.y;
-    a2.z = a1.z;
-    a2.scale = a1.scale;
-    a2.frame = a1.frame;
-    switch (a2.typ) {
-    case ROTATE:
-        a2.x += a2.dx;
-        a2.y += a2.dy;
-        a2.z += a2.dz;
-        break;
-    case ZOOM:
-        a2.prevScale = a2.scale;
-        a2.scale = a2.newScale;
-        break;
-    case SIMULATE:
-        a2.frame += a2.dFrame;
-        break;
-    }
-}
 
 /*! @brief Takes in an action and returns an array of strings describing the state of the simulation before the action.
 
-    This function formats the members of the passed action - x, y, z, scale, and frame.
+    This function formats the members of the passed action - xrot, yrot, zrot, scale, and frame.
     It then puts them in a string array "strings" and returns it.
 
 */
 std::vector<QString> getStateStrings(Action action) {
     QString x, y, z, sc, fr;
-    x = QString::number(action.x, 'f', 2);
-    y = QString::number(action.y, 'f', 2);
-    z = QString::number(action.z, 'f', 2);
+    x = QString::number(action.xrot, 'f', 2);
+    y = QString::number(action.yrot, 'f', 2);
+    z = QString::number(action.zrot, 'f', 2);
     sc = QString::number(action.scale, 'f', 2);
     fr = QString::number(action.frame);
     std::vector<QString> strings (5);
@@ -139,40 +113,13 @@ std::vector<QString> getStateStrings(Action action) {
     "Action" here can be replaced with an arbitrary data type.
 */
 void Queue::addActionToQueue(Action action) {
-    QString text, x, y, z, sc, fr;
-    switch (action.typ) {
-    case ROTATE:
-        x = QString::number(action.dx);
-        y = QString::number(action.dy);
-        z = QString::number(action.dz);
-        text = QString("Rotate (%1, %2, %3) degrees").arg(x, y, z);
-        break;
-    case ZOOM:
-        sc = QString::number(action.newScale);
-        text = QString("Zoom to %1").arg(sc);
-        break;
-    case SIMULATE:
-        fr = QString::number(action.dFrame);
-        text = QString("Simulate %1 frames").arg(fr);
-        break;
-    case PAUSE:
-        text = "Pause";
-        break;
-    case INITIALIZE:
-        text = "Initialize";
-        break;
-    }
-
     QVariant v;
     v.setValue(action);
     QTableWidgetItem* act = new QTableWidgetItem(0);
-    act->setText(text);
     act->setData(Qt::UserRole, v);
     act->setFlags(act->flags() ^ Qt::ItemIsEditable);
 
     QTableWidgetItem* span = new QTableWidgetItem(0);
-    text = QString::number(action.span);
-    span->setText(text);
     span->setFlags(span->flags() ^ Qt::ItemIsEditable);
     span->setTextAlignment(Qt::AlignHCenter);
 
@@ -182,37 +129,96 @@ void Queue::addActionToQueue(Action action) {
         setRowHeight(index, 20);
     }
 
-    std::vector<QString> strings = getStateStrings(action);
-
     setItem(index, 0, act);
     setItem(index, 1, span);
     for (int i=0; i < 5; i++) {
         QTableWidgetItem* item = new QTableWidgetItem(0);
-        item->setText(strings[i]);
         item->setFlags(item->flags() ^ Qt::ItemIsEditable);
         item->setTextAlignment(Qt::AlignHCenter);
         setItem(index, i + 2, item);
     }
-    updateStates(index + 1, rowCount());
+    updateQueue(index, rowCount());
 }
 
-/*! @brief Calculates and updates the states of all actions with indices between "start" and "end" in the queue.
-
-    For each action, this function finds the state of the action before it, and then calculates the correct
-    state for current action. It then updates the text in the table.
+/* @brief Updates all actions with indices between "start" and "end" in the queue.
+ *
+    For each action, this function makes sure it syncs up with the previous action in the
+    queue. It then updates the text in the table.  Called whenever queue is updated.
 */
-void Queue::updateStates(int start, int end) {
+void Queue::updateQueue(int start, int end) {
     for (int i = start; i < end; i++) {
-        QVariant v1 = item(i - 1, 0)->data(Qt::UserRole);
-        Action a1 = v1.value<Action>();
         QVariant v2 = item(i, 0)->data(Qt::UserRole);
         Action a2 = v2.value<Action>();
-        calculateNextState(a1, a2);
+
+        if(a2.typ != INITIALIZE){
+            QVariant v1 = item(i - 1, 0)->data(Qt::UserRole);
+            Action a1 = v1.value<Action>();
+            syncAction(a1, a2);
+
+            if(a2.frame < a1.frame){
+                a2.frame = a1.frame;
+            }
+        }
+
+        QString text, x, y, z, sc, fr;
+        switch (a2.typ) {
+        case ROTATE:
+            x = QString::number(a2.xrot);
+            y = QString::number(a2.yrot);
+            z = QString::number(a2.zrot);
+            text = QString("Rot. to (%1, %2, %3)").arg(x, y, z);
+            break;
+        case ZOOM:
+            sc = QString::number(a2.scale);
+            text = QString("Zoom to %1").arg(sc);
+            break;
+        case SIMULATE:
+            fr = QString::number(a2.frame);
+            text = QString("Sim. to frame %1").arg(fr);
+            break;
+        case PAUSE:
+            text = "Pause";
+            break;
+        case INITIALIZE:
+            text = "Initialize";
+            break;
+        }
+
         a2.queueIndex = i;
         v2.setValue(a2);
         item(i, 0)->setData(Qt::UserRole, v2);
+        item(i, 0)->setText(text);
+
+        text = QString::number(a2.span);
+        item(i, 1)->setText(text);
+
         std::vector<QString> strings = getStateStrings(a2);
         for (int j=0; j < 5; j++) item(i, j + 2)->setText(strings[j]);
+    }
+}
+
+/*! @brief Used to make sure a queue action is synced up with the previous one in the queue.
+
+    Syncs up action a2 with the previous action in the queue (a1).  Makes sure all the state
+    variables that are not modified by the a2 action match those of a1.  Called when the queue
+    is changed in any way.
+*/
+
+void Queue::syncAction(Action a1, Action &a2) {
+    if(a2.typ != ROTATE){   // if not rotating, set to previous action's values
+        a2.xrot = a1.xrot;
+        a2.yrot = a1.yrot;
+        a2.zrot = a1.zrot;
+    }
+    if(a2.typ != ZOOM){
+        a2.scale = a1.scale;
+    }
+    if(a2.typ != SIMULATE){
+        a2.frame = a1.frame;
+    }
+
+    if(a2.frame < a1.frame){
+        a2.frame = a1.frame;
     }
 }
 
@@ -232,12 +238,12 @@ void Queue::provideContextMenu(QPoint p) {
     }
 }
 
-/*! @brief Removes a row from the table (effectively removing an actin from the queue).
+/*! @brief Removes a row from the table (effectively removing an action from the queue).
 
-    After removal, this function updates the states of all of the actions that follow it.
+    After removal, this function updates the queue with all of the actions that follow it.
 
 */
 void Queue::removeAction() {
     removeRow(rowToRemove);
-    updateStates(rowToRemove, rowCount());
+    updateQueue(rowToRemove, rowCount());
 }

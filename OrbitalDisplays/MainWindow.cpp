@@ -321,11 +321,6 @@ namespace Disp {
                                      driver->getState(),
                                      driver->getSimulationSize());
             if (dialog.exec() == QDialog::Accepted) {
-                if (dialog.act.typ != INITIALIZE) {
-                    QVariant v = queue->item(dialog.act.queueIndex - 1, 0)->data(Qt::UserRole);
-                    Action action = v.value<Action>();
-                    queue->calculateNextState(action, dialog.act);
-                }
                 queue->addActionToQueue(dialog.act);
             }
         }

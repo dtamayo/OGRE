@@ -425,7 +425,7 @@ namespace Disp
 
         coordLength = std::max(ABS(maximum.x), std::max(ABS(maximum.y), std::max(ABS(maximum.z),
                                std::max(ABS(minimum.x), std::max(ABS(minimum.y), ABS(minimum.z))))));
-        settingsDialog->setFrameRange(simulationSize);
+        settingsDialog->setFrameRange(simulationSize-1);
         loading = false;
         updateGL();
 
@@ -595,11 +595,11 @@ namespace Disp
     */
     void OrbitalAnimator::performAction(Action act) {
         switch (act.typ) {
-        case ROTATE: rotate(act.dx, act.dy, act.dz, act.span); break;
+        case ROTATE: rotate(act.dxrot, act.dyrot, act.dzrot, act.span); break;
         case ZOOM: zoom(act.newScale, act.span); break;
         case SIMULATE: simulate(act.dFrame, act.span); break;
         case PAUSE: doNothing(act.span); break;
-        case INITIALIZE: initialize(act.x, act.y, act.z, act.scale, act.frame);
+        case INITIALIZE: initialize(act.xrot, act.yrot, act.zrot, act.scale, act.frame);
         }
     }
 
@@ -610,12 +610,12 @@ namespace Disp
     void OrbitalAnimator::checkAndPerformAction(QTableWidgetItem* item) {
         QVariant v = item->data(Qt::UserRole);
         Action act = v.value<Action>();
-        double x = act.x, y = act.y, z = act.z, sc = act.scale, fr = act.frame;
+        double x = act.xrot, y = act.yrot, z = act.zrot, sc = act.scale, fr = act.frame;
         switch (act.typ) {
         case ROTATE:
-            x -= act.dx;
-            y -= act.dy;
-            z -= act.dz;
+            x -= act.dxrot;
+            y -= act.dyrot;
+            z -= act.dzrot;
             break;
         case ZOOM:
             sc = act.prevScale;
