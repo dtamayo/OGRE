@@ -533,11 +533,11 @@ namespace Disp
     */
     void OrbitalAnimator::zoom(double amt, double time) {
         int nFrames = int(time*FPS);
-        double dz = (amt - scaleFactor) / (nFrames - 1.); //(amt * scaleFactor - scaleFactor) / time;
+        double dz = (amt - scaleFactor) / (nFrames - 1.);
+        double prevScaleFactor = scaleFactor;
         for (int i=0; i < nFrames-1; i++) {
-            scaleFactor += dz;
+            scaleFactor = prevScaleFactor + i*dz;
             settingsDialog->zoomScaleSlider->setDoubleValue(log10(scaleFactor));
-            //settingsDialog->scrollZoom->setValue(scaleFactor * 100);
             updateOrRecord();
         }
 
@@ -596,7 +596,7 @@ namespace Disp
     void OrbitalAnimator::performAction(Action act) {
         switch (act.typ) {
         case ROTATE: rotate(act.dxrot, act.dyrot, act.dzrot, act.span); break;
-        case ZOOM: zoom(act.newScale, act.span); break;
+        case ZOOM: zoom(act.scale, act.span); break;
         case SIMULATE: simulate(act.dFrame, act.span); break;
         case PAUSE: doNothing(act.span); break;
         case INITIALIZE: initialize(act.xrot, act.yrot, act.zrot, act.scale, act.frame);
