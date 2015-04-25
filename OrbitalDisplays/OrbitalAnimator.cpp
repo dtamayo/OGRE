@@ -33,6 +33,7 @@
 */
 
 #include "OrbitalAnimator.h"
+#include <qDebug>
 
 #define COORD_X 0
 #define COORD_Y 1
@@ -500,6 +501,8 @@ namespace Disp
         updateGL();
     }
 
+    /*! @brief Keeps rotation angles in the range [-180,180].
+    */
     void setNewRotation(double &rot, double dx) {
         double xtemp = rot + dx;
         if (xtemp > 180) rot = xtemp - 360;
@@ -507,25 +510,46 @@ namespace Disp
         else rot = xtemp;
     }
 
+    /*! @brief Keeps rotation angles in the range [-180,180].
+    */
+    double checkRotRange(double rot) {
+        if (rot > 180.) rot -= 360.;
+        if (rot < -180.) rot += 360.;
+        return rot;
+    }
+
+    /*! @brief Checks which direction to rotate is shorter, and returns dtheta.
+     *
+     * Wraps around 180, so rotation angle ranges are [-180,180].
+    */
+    double dThetaRotMin(double theta, double thetaFinal){
+        double theta1 = thetaFinal - theta;
+        double theta2 = (theta1 > 0) ? theta1 - 360. : theta1 + 360.; // rotation in other direction to theta1
+
+        return (abs(theta1) <= abs(theta2)) ? theta1 : theta2;
+    }
+
     /*! @brief Rotates the simulation
 
         This function rotates the simulation by (x, y, z) over "time."
     */
     void OrbitalAnimator::rotate(double xrot, double yrot, double zrot, int time) {
+        qDebug() << xrot;
         int nFrames = int(time*FPS);
-        double dxrot = (xrot-xrotation) / (nFrames - 1.);
-        double dyrot = (yrot-yrotation) / (nFrames - 1.);
-        double dzrot = (zrot-zrotation) / (nFrames - 1.);
-
-        // NEED TO THINK ABOUT HOW TO DO A ROTATION IF IT WRAPS AROUND 360 (IMPLEMENTED CURRENTLY USING DX RATHER THAN ABSOLUTE VALUES, BUT THEN WE CAN't USE TRICK IN ZOOM TO ENSURE WE END UP AT THE SPOT WE WANT EXACTLY
+        double dxrot = dThetaRotMin(xrotation, xrot) / (nFrames - 1.);
+        double dyrot = dThetaRotMin(yrotation, yrot) / (nFrames - 1.);
+        double dzrot = dThetaRotMin(zrotation, zrot) / (nFrames - 1.);
 
         for (int i=0; i < nFrames-1; i++) {
-            setNewRotation(xrotation, dx);
-            setNewRotation(yrotation, dy);
-            setNewRotation(zrotation, dz);
-            settingsDialog->xRotationBox->setValue(xrotation);
-            settingsDialog->yRotationBox->setValue(yrotation);
-            settingsDialog->zRotationBox->setValue(zrotation);
+            xrotation = checkRotRange(xrotation + i*dxrot);
+            yrotation = checkRotRange(yrotation + i*dyrot);
+            zrotation = checkRotRange(zrotation + i*dzrot);
+            //setNewRotation(xrotation, dx);
+            //setNewRotation(yrotation, dy);
+            //setNewRotation(zrotation, dz);
+            //settingsDialog->xRotationBox->setValue(xrotation);
+            //settingsDialog->yRotationBox->setValue(yrotation);
+            //settingsDialog->zRotationBox->setValue(zrotation);
             updateOrRecord();
         }
     }
@@ -737,15 +761,15 @@ namespace Disp
         int speed = 1;
 
         if (event->buttons() & Qt::LeftButton) {
-            setNewRotation(yrotation, speed * dy);
-            setNewRotation(zrotation, speed * dx);
+            yrotation = checkRotRange(yrotation + speed * dy);
+            zrotation = checkRotRange(zrotation + speed * dx);
             //settingsDialog->yRotationBox->setValue(yrotation);
             //settingsDialog->zRotationBox->setValue(zrotation);
             updateGL();
         }
         else if (event->buttons() & Qt::RightButton) {
-            setNewRotation(yrotation, speed * dy);
-            setNewRotation(xrotation, speed * dx);
+            yrotation = checkRotRange(yrotation + speed * dy);
+            xrotation = checkRotRange(xrotation + speed * dx);
             //settingsDialog->yRotationBox->setValue(yrotation);
             //settingsDialog->xRotationBox->setValue(xrotation);
             updateGL();
