@@ -534,19 +534,19 @@ namespace Disp
         This function rotates the simulation by (x, y, z) over "time."
     */
     void OrbitalAnimator::rotate(double xrot, double yrot, double zrot, int time) {
-        qDebug() << xrot;
         int nFrames = int(time*FPS);
         double dxrot = dThetaRotMin(xrotation, xrot) / (nFrames - 1.);
         double dyrot = dThetaRotMin(yrotation, yrot) / (nFrames - 1.);
         double dzrot = dThetaRotMin(zrotation, zrot) / (nFrames - 1.);
 
-        for (int i=0; i < nFrames-1; i++) {
-            xrotation = checkRotRange(xrotation + i*dxrot);
-            yrotation = checkRotRange(yrotation + i*dyrot);
-            zrotation = checkRotRange(zrotation + i*dzrot);
-            //setNewRotation(xrotation, dx);
-            //setNewRotation(yrotation, dy);
-            //setNewRotation(zrotation, dz);
+        double xrotation_i = xrotation;
+        double yrotation_i = yrotation;
+        double zrotation_i = zrotation;
+
+        for (int i=0; i < nFrames; i++) {
+            xrotation = checkRotRange(xrotation_i + i*dxrot);
+            yrotation = checkRotRange(yrotation_i + i*dyrot);
+            zrotation = checkRotRange(zrotation_i + i*dzrot);
             //settingsDialog->xRotationBox->setValue(xrotation);
             //settingsDialog->yRotationBox->setValue(yrotation);
             //settingsDialog->zRotationBox->setValue(zrotation);

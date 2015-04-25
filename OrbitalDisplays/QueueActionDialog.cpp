@@ -77,9 +77,9 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
         first->setRange(-180, 180);
         second->setRange(-180, 180);
         third->setRange(-180, 180);
-        formLayout->addRow("Rotate X by: ", first);
-        formLayout->addRow("Rotate Y by: ", second);
-        formLayout->addRow("Rotate Z by: ", third);
+        formLayout->addRow("Rotate X to: ", first);
+        formLayout->addRow("Rotate Y to: ", second);
+        formLayout->addRow("Rotate Z to: ", third);
         setWindowTitle("Rotate");
         break;
     case ZOOM:
