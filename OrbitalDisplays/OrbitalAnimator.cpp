@@ -33,6 +33,7 @@
 */
 
 #include "OrbitalAnimator.h"
+#include <qDebug>
 
 #define COORD_X 0
 #define COORD_Y 1
@@ -48,7 +49,7 @@ namespace Disp
         This constructor is called from OrbitalAnimationDriver::setupUI().  The OrbitalAnimator extends the QGLWidget class.
         The constructor initializes default values and prepares the arrays cosfs and sinfs.
     */
-    OrbitalAnimator::OrbitalAnimator(OrbitalAnimatorSettings& settings_, QWidget *parent/* = 0*/)
+    OrbitalAnimator::OrbitalAnimator(OrbitalAnimatorSettings& settings_, QWidget *parent)
         : QGLWidget(parent)
         , simulationDataLoaded(false)
         , equatorialDataLoaded(false)
@@ -56,7 +57,7 @@ namespace Disp
         , settings(settings_)
         , currentIndex(0)
         , simulationSize(0)
-        , scaleFactor(1)
+        , scaleFactor(1.)
         , xrotation(0)
         , yrotation(0)
         , zrotation(0)
@@ -66,6 +67,9 @@ namespace Disp
         , pictureNumber(0)
         , trailLength(60)
         , drawFullOrbit(false)
+        , fillOrbits(false)
+        , drawParticles(true)
+        , drawOrbitNormals(false)
     {
         QFont newFont(font());
         newFont.setPointSize(30);
@@ -104,6 +108,22 @@ namespace Disp
         glEnable(GL_DEPTH_TEST);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-0.5, +0.5, -0.5, +0.5, 1.0, 40.0);
+        glMatrixMode(GL_MODELVIEW);
+        gluLookAt(0, 0, 30, 0, 0, 0, 0, 1, 0);
+
+        /*GLfloat values[2];
+        glGetFloatv (GL_LINE_WIDTH_GRANULARITY, values);
+        qDebug() << "GL_LINE_WIDTH_GRANULARITY value is " << values[0];
+        glGetFloatv (GL_LINE_WIDTH_RANGE, values);
+        qDebug() << "GL_LINE_WIDTH_RANGE values are " << values[0] << "and" << values[1];*/
+
+        glEnable(GL_LINE_SMOOTH);      
+        glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+        glLineWidth(3.5);
     }
 
     /*! @brief Resizes the OpenGL viewport
@@ -116,11 +136,6 @@ namespace Disp
     void OrbitalAnimator::resizeGL(int w, int h) {
         int newDim = std::min(w, h);
         glViewport(0, 0, (GLint)newDim, (GLint)newDim);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-0.5, +0.5, -0.5, +0.5, 1.0, 40.0);
-        glMatrixMode(GL_MODELVIEW);
-        gluLookAt(0, 0, 30, 0, 0, 0, 0, 1, 0);
     }
 
     /*! @brief Renders the scene
@@ -136,10 +151,13 @@ namespace Disp
     void OrbitalAnimator::paintGL() {
         glPushMatrix();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
         double orbitXScaleFactor = maximum.x - minimum.x;
         double orbitYScaleFactor = maximum.y - minimum.y;
         double orbitZScaleFactor = maximum.z - minimum.z;
-        double orbitScaleFactor = 1. / std::max(orbitXScaleFactor, std::max(orbitYScaleFactor, orbitZScaleFactor));
+        double maxscale = std::max(orbitXScaleFactor, std::max(orbitYScaleFactor, orbitZScaleFactor));
+        double orbitScaleFactor = ((maxscale==0) ? 1. : 1./maxscale);
+        //qDebug() << orbitScaleFactor << scaleFactor << scaleFactor * orbitScaleFactor;
         glScalef(scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor);
         glRotatef(-90, 1, 0, 0); // Change x-y orbital plane to x-z Display plane for display
         glRotatef(-90, 0, 0, 1);
@@ -194,8 +212,15 @@ namespace Disp
 
         if (settings.displayMainOrbit() && simulationDataLoaded) {
             glPushMatrix();
-            if (drawFullOrbit) { /*drawOrbitalNormal();*/ drawOrbit(); }
-            else { /*drawTrail();*/ drawParticle(); }
+            if (drawFullOrbit) {
+                drawOrbit();
+            }
+            if (drawParticles) {
+                drawParticle();
+            }
+            if (drawOrbitNormals) {
+                drawOrbitalNormal();
+            }
             glPopMatrix();
         }
 /*
@@ -271,40 +296,50 @@ namespace Disp
         Only works if Orbit::calculateOrbit() has been called on the particle.
     */
     void OrbitalAnimator::drawOrbit() {
-        glColor4f(settings.orbitalPlaneColor().red() / 255.,
-                  settings.orbitalPlaneColor().green() / 255.,
-                  settings.orbitalPlaneColor().blue() / 255.,
-                  settings.orbitalPlaneColor().alpha() / 255.);
-        glPushMatrix();
-        glRotatef(orbitData[0][currentIndex].Omega, 0, 0, 1);
-        glRotatef(orbitData[0][currentIndex].i, 1, 0, 0);
-        glRotatef(orbitData[0][currentIndex].w, 0, 0, 1);
-        glBegin(GL_POLYGON);
-        for (int f = 0; f < 360; ++f) {
-            glVertex3f(orbitData[0][currentIndex].orbitCoords[f].x,
-                       orbitData[0][currentIndex].orbitCoords[f].y,
-                       orbitData[0][currentIndex].orbitCoords[f].z);
-        }
-        glEnd();
+        for (OrbitData::const_iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) { // iterate over particles
+            glPushMatrix();
 
-        glColor4f(settings.orbitColor().red() / 255.,
-                  settings.orbitColor().green() / 255.,
-                  settings.orbitColor().blue() / 255.,
-                  settings.orbitColor().alpha() / 255.);
-        glBegin(GL_LINE_STRIP);
-        for (int f = 0; f < 360; ++f) {
-            glVertex3f(orbitData[0][currentIndex].orbitCoords[f].x,
-                       orbitData[0][currentIndex].orbitCoords[f].y,
-                       orbitData[0][currentIndex].orbitCoords[f].z);
+            if ((size_t)currentIndex < (itr->second).size()) {
+                if(fillOrbits){
+                    glColor4f(settings.orbitalPlaneColor().red() / 255.,
+                          settings.orbitalPlaneColor().green() / 255.,
+                          settings.orbitalPlaneColor().blue() / 255.,
+                          settings.orbitalPlaneColor().alpha() / 255.);
+
+                    glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
+                    glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
+                    glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                    glBegin(GL_POLYGON);
+                    for (int f = 0; f < 360; ++f) {
+                        glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
+                               (itr->second)[currentIndex].orbitCoords[f].y,
+                               (itr->second)[currentIndex].orbitCoords[f].z);
+                    }
+                    glEnd();
+                }
+
+                glColor4f(settings.orbitColor().red() / 255.,
+                          settings.orbitColor().green() / 255.,
+                          settings.orbitColor().blue() / 255.,
+                          settings.orbitColor().alpha() / 255.);
+                glBegin(GL_LINE_STRIP);
+                for (int f = 0; f < 360; ++f) {
+                    glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
+                               (itr->second)[currentIndex].orbitCoords[f].y,
+                               (itr->second)[currentIndex].orbitCoords[f].z);
+                    //qDebug() << ctr << (itr->second)[currentIndex].orbitCoords[f].x << (itr->second)[currentIndex].orbitCoords[f].y << (itr->second)[currentIndex].orbitCoords[f].z;
+                }
+
+                glVertex3f((itr->second)[currentIndex].orbitCoords[0].x,
+                           (itr->second)[currentIndex].orbitCoords[0].y,
+                           (itr->second)[currentIndex].orbitCoords[0].z);
+                glEnd();
+                glPopMatrix();
+            }
         }
-        glVertex3f(orbitData[0][currentIndex].orbitCoords[0].x,
-                   orbitData[0][currentIndex].orbitCoords[0].y,
-                   orbitData[0][currentIndex].orbitCoords[0].z);
-        glEnd();
-        glPopMatrix();
     }
 
-/*
+
     void OrbitalAnimator::drawOrbitalNormal()
     {
         glColor4f(settings.orbitColor().red() / 255.,
@@ -313,7 +348,7 @@ namespace Disp
                   settings.orbitColor().alpha() / 255.);
         drawVector(normals[currentIndex] * normalsScalar);
     }
-*/
+
 
     /*! @brief Calls Orbit::calculateOrbit() on all the particles in eclipticOrbits
 
@@ -388,11 +423,13 @@ namespace Disp
             }
             if ((itr->second).size() > (size_t)simulationSize) simulationSize = (itr->second).size();
         }
+
         coordLength = std::max(ABS(maximum.x), std::max(ABS(maximum.y), std::max(ABS(maximum.z),
                                std::max(ABS(minimum.x), std::max(ABS(minimum.y), ABS(minimum.z))))));
-        settingsDialog->setFrameRange(simulationSize);
+        settingsDialog->setFrameRange(simulationSize-1);
         loading = false;
         updateGL();
+
     }
 
     /*! @brief Removes the equatorial orbits
@@ -464,6 +501,8 @@ namespace Disp
         updateGL();
     }
 
+    /*! @brief Keeps rotation angles in the range [-180,180].
+    */
     void setNewRotation(double &rot, double dx) {
         double xtemp = rot + dx;
         if (xtemp > 180) rot = xtemp - 360;
@@ -471,19 +510,43 @@ namespace Disp
         else rot = xtemp;
     }
 
+    /*! @brief Keeps rotation angles in the range [-180,180].
+    */
+    double checkRotRange(double rot) {
+        if (rot > 180.) rot -= 360.;
+        if (rot < -180.) rot += 360.;
+        return rot;
+    }
+
+    /*! @brief Checks which direction to rotate is shorter, and returns dtheta.
+     *
+     * Wraps around 180, so rotation angle ranges are [-180,180].
+    */
+    double dThetaRotMin(double theta, double thetaFinal){
+        double theta1 = thetaFinal - theta;
+        double theta2 = (theta1 > 0) ? theta1 - 360. : theta1 + 360.; // rotation in other direction to theta1
+
+        return (abs(theta1) <= abs(theta2)) ? theta1 : theta2;
+    }
+
     /*! @brief Rotates the simulation
 
         This function rotates the simulation by (x, y, z) over "time."
     */
-    void OrbitalAnimator::rotate(double x, double y, double z, int time) {
-        double t = (double)time;
-        double dx = x / t;
-        double dy = y / t;
-        double dz = z / t;
-        for (int i=0; i < time; i++) {
-            setNewRotation(xrotation, dx);
-            setNewRotation(yrotation, dy);
-            setNewRotation(zrotation, dz);
+    void OrbitalAnimator::rotate(double xrot, double yrot, double zrot, int time) {
+        int nFrames = int(time*FPS);
+        double dxrot = dThetaRotMin(xrotation, xrot) / (nFrames - 1.);
+        double dyrot = dThetaRotMin(yrotation, yrot) / (nFrames - 1.);
+        double dzrot = dThetaRotMin(zrotation, zrot) / (nFrames - 1.);
+
+        double xrotation_i = xrotation;
+        double yrotation_i = yrotation;
+        double zrotation_i = zrotation;
+
+        for (int i=0; i < nFrames; i++) {
+            xrotation = checkRotRange(xrotation_i + i*dxrot);
+            yrotation = checkRotRange(yrotation_i + i*dyrot);
+            zrotation = checkRotRange(zrotation_i + i*dzrot);
             //settingsDialog->xRotationBox->setValue(xrotation);
             //settingsDialog->yRotationBox->setValue(yrotation);
             //settingsDialog->zRotationBox->setValue(zrotation);
@@ -495,14 +558,20 @@ namespace Disp
 
         This function zooms the simulation to "amt" over "time."
     */
-    void OrbitalAnimator::zoom(double amt, int time) {
-        double dz = (amt * scaleFactor - scaleFactor) / time;
-        for (int i=0; i < time; i++) {
-            scaleFactor += dz;
-            settingsDialog->zoomScaleBox->setValue(scaleFactor);
-            //settingsDialog->scrollZoom->setValue(scaleFactor * 100);
+    void OrbitalAnimator::zoom(double amt, double time) {
+        int nFrames = int(time*FPS);
+        double dz = (amt - scaleFactor) / (nFrames - 1.);
+        double prevScaleFactor = scaleFactor;
+        for (int i=0; i < nFrames-1; i++) {
+            scaleFactor = prevScaleFactor + i*dz;
+            settingsDialog->zoomScaleSlider->setDoubleValue(log10(scaleFactor));
             updateOrRecord();
         }
+
+        // do last step manually to ensure we reach specified scaleFactor at the end
+        settingsDialog->zoomScaleSlider->setDoubleValue(log10(amt));
+        scaleFactor = amt;
+        updateOrRecord();
     }
 
     /*! @brief Plays the simulation
@@ -510,16 +579,15 @@ namespace Disp
         This function increases the frame number of the simulation by "amt" over "time."
     */
     void OrbitalAnimator::simulate(int amt, int time) {
-        int remainder = amt % time;
-        int ds = (amt - remainder) / time;
-        for (int i=0; i < time; i++) {
-            currentIndex += ds;
+        int nFrames = int(time*FPS); // number of frames we need to create
+        double deltaFrame = amt/double(nFrames-1.);
+        int indexInitial = currentIndex;
+        for (int i=0; i < nFrames; i++) {
+            currentIndex = int(round(indexInitial + i*deltaFrame));
             settingsDialog->scrollTimeIndex->setValue(currentIndex);
             settingsDialog->timeIndex->setValue(currentIndex);
             updateOrRecord();
         }
-        currentIndex += remainder;
-        if (remainder != 0) updateOrRecord();
     }
 
     /*! @brief Pauses the simulation
@@ -542,7 +610,7 @@ namespace Disp
         //settingsDialog->xRotationBox->setValue(xrotation);
         //settingsDialog->yRotationBox->setValue(yrotation);
         //settingsDialog->zRotationBox->setValue(zrotation);
-        settingsDialog->zoomScaleBox->setValue(scaleFactor);
+        settingsDialog->zoomScaleSlider->setDoubleValue(log10(scaleFactor));
         settingsDialog->scrollTimeIndex->setValue(currentIndex);
         settingsDialog->timeIndex->setValue(currentIndex);
         updateOrRecord();
@@ -550,31 +618,39 @@ namespace Disp
 
     /*! @brief Executes an action
 
-        This function takes in an Action (defined in Queue.h) and executes it in the simulation.
+        This function takes in an Action (defined in Queue.h) and executes it in the simulation
+        (from the current state).
     */
     void OrbitalAnimator::performAction(Action act) {
         switch (act.typ) {
-        case ROTATE: rotate(act.dx, act.dy, act.dz, act.span); break;
-        case ZOOM: zoom(act.newScale, act.span); break;
-        case SIMULATE: simulate(act.dFrame, act.span); break;
+        case ROTATE: rotate(act.xrot, act.yrot, act.zrot, act.span); break;
+        case ZOOM: zoom(act.scale, act.span); break;
+        case SIMULATE: simulate(act.frame, act.span); break;
         case PAUSE: doNothing(act.span); break;
-        case INITIALIZE: initialize(act.x, act.y, act.z, act.scale, act.frame);
+        case INITIALIZE: initialize(act.xrot, act.yrot, act.zrot, act.scale, act.frame);
         }
     }
 
-    /*! @brief Sets the simulation to the correct state, then performs the action
+/* Need a way to access previous queue action to set state or store previous values
+ * for each action in order to do this.  If you want, you'd then uncomment the signal/slot
+ * connection in MainWindow::makeConnections between itemDoubleClicked and the slot in
+ * OrbitalAnimationDriver (which should also be commented out)
+ *
+! @brief Sets the simulation to a given action's state, then performs the action
 
-        This function sets the simulation to the state stored in the Action and then performs the action.
-    */
-    void OrbitalAnimator::checkAndPerformAction(QTableWidgetItem* item) {
+        This function sets the simulation to the state at the end of the previous action
+        and then performs the passed action.
+
+    void OrbitalAnimator::performIntermediateAction(QTableWidgetItem* item) {
         QVariant v = item->data(Qt::UserRole);
         Action act = v.value<Action>();
-        double x = act.x, y = act.y, z = act.z, sc = act.scale, fr = act.frame;
+
+        double x = act.xrot, y = act.yrot, z = act.zrot, sc = act.scale, fr = act.frame;
         switch (act.typ) {
         case ROTATE:
-            x -= act.dx;
-            y -= act.dy;
-            z -= act.dz;
+            x -= act.dxrot;
+            y -= act.dyrot;
+            z -= act.dzrot;
             break;
         case ZOOM:
             sc = act.prevScale;
@@ -586,6 +662,7 @@ namespace Disp
         if (act.typ != 4) initialize(x, y, z, sc, fr);
         performAction(act);
     }
+*/
 
     /*! @brief Iterates through queue and calls Disp::OrbitalAnimator::performAction() on each item.
     */
@@ -605,8 +682,8 @@ namespace Disp
 
         // first make a dialog to get the folder wants to store images in
         QString dirName = QFileDialog::getExistingDirectory(this, tr("Choose or create the folder to which you want images output"), qgetenv("HOME"), QFileDialog::ShowDirsOnly);
-        if(dirName.compare(QString::QString(""), Qt::CaseSensitive) == 0) {   return;  } // if the directory name = "", then user hit cancel so we return
-        tmpPNGFolder = QDir::QDir(dirName);
+        if(dirName.compare(QString(""), Qt::CaseSensitive) == 0) {   return;  } // if the directory name = "", then user hit cancel so we return
+        tmpPNGFolder = QDir(dirName);
 
         recording = true;
         playbackQueue(queue);   // generate images
@@ -667,7 +744,7 @@ namespace Disp
         if (numSteps < 0) scaleFactor *= pow(.8, -numSteps);
         else scaleFactor *= pow(1.25, numSteps);
 
-        settingsDialog->zoomScaleBox->setValue(scaleFactor);
+        settingsDialog->zoomScaleSlider->setDoubleValue(log10(scaleFactor));
         updateGL();
     }
 
@@ -684,15 +761,15 @@ namespace Disp
         int speed = 1;
 
         if (event->buttons() & Qt::LeftButton) {
-            setNewRotation(yrotation, speed * dy);
-            setNewRotation(zrotation, speed * dx);
+            yrotation = checkRotRange(yrotation + speed * dy);
+            zrotation = checkRotRange(zrotation + speed * dx);
             //settingsDialog->yRotationBox->setValue(yrotation);
             //settingsDialog->zRotationBox->setValue(zrotation);
             updateGL();
         }
         else if (event->buttons() & Qt::RightButton) {
-            setNewRotation(yrotation, speed * dy);
-            setNewRotation(xrotation, speed * dx);
+            yrotation = checkRotRange(yrotation + speed * dy);
+            xrotation = checkRotRange(xrotation + speed * dx);
             //settingsDialog->yRotationBox->setValue(yrotation);
             //settingsDialog->xRotationBox->setValue(xrotation);
             updateGL();
@@ -763,7 +840,7 @@ namespace Disp
         QString x = QString("X Rot (deg) : %1").arg(xrotation); // substitutes xrotation for %1
         QString y = QString("Y Rot (deg) : %1").arg(yrotation);
         QString z = QString("Z Rot (deg) : %1").arg(zrotation);
-        QString zoom = QString("Zoom : %1%").arg(scaleFactor * 100);
+        QString zoom = QString("Zoom Factor: %1").arg(scaleFactor);
         QString frame = QString("Frame Number : %1").arg(simulationDataLoaded ? currentIndex : 0);
         QFont f;
         f.setPointSize(16);
@@ -783,15 +860,11 @@ namespace Disp
 
     /*! @brief SLOT executed when zoom is changed in the SettingsDialog.
 
-        Connected in OrbitalAnimationDriver::makeConnections().
-
-      This version should be used if zoom is changed to a slider.*/
-    void OrbitalAnimator::setZoomFactor(int zoom)
+        Connected in OrbitalAnimationDriver::makeConnections().*/
+    void OrbitalAnimator::setZoomFactor(double zoom)
     {
-        double f = (double)zoom;
-        f = std::pow(10, zoom / 100.0);
-        f = std::max(0.001, std::min(100000.0, f));
-        scaleFactor = f;
+        zoom = std::max(0.001, std::min(100000.0, zoom));
+        scaleFactor = zoom;
         updateGL();
     }
 

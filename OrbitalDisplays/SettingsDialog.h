@@ -56,6 +56,7 @@
 #include <QtGui/QLineEdit>
 
 #include "Settings.h"
+#include "Helpers/DoubleSlider.h"
 
 /*! @brief main namespace for the project
 */
@@ -84,7 +85,7 @@ namespace Disp
         */
         QDoubleSpinBox* zRotationBox;
 
-        QSlider* zoomScaleBox;
+        DoubleSlider* zoomScaleSlider;
 
         //QSlider* scrollZoom;
 
@@ -120,7 +121,7 @@ namespace Disp
 
         void setZRot(double);
 
-        void setZoomFactor(int);
+        void setZoomFactor(double);
 
         void rotate();
 
@@ -136,6 +137,8 @@ namespace Disp
 
     private slots:
 
+        void calcZoomFactor(double);
+
         void selectCentralBodyColor();
 
         void selectOrbitalPlaneColor();
@@ -149,21 +152,13 @@ namespace Disp
     private:
 
         OrbitalAnimatorSettings& animatorSettings;
-
         QCheckBox* animate;
-
         QSpinBox* timeStep;
-
         QPushButton* centralBodyColorSelector;
-
         QPushButton* orbitalPlaneColorSelector;
-
         QPushButton* orbitColorSelector;
-
         QPushButton* rotator;
-
         QPushButton* zoomer;
-
         QPushButton* simulator;
 
         void setupUI();

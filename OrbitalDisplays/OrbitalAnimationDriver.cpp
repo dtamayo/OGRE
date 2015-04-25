@@ -85,23 +85,27 @@ namespace Disp
         orbitalAnimator->equatorialDataLoaded = true;
     }
 
-    /*! @brief Reads in a .dI data file.
+    /*! @brief Reads in an input file.
 
-        Calls Disp::dIFile::dIFile(), passing it the simulation data file name, which it gets when called by
+        Calls the appropriate <integrator>File() function, passing it the simulation data file name, which it gets when called by
         Disp::MainWindow::openSimulation().  It also sets the maximum on the slider in the settings dialog that lets the user slide through the
         simulation frames to the last frame in the simulation.
 
-        @sa @ref Disp::OrbitalAnimator::setSimulationData(), Disp::dIFile::dIFile()
+        @sa @ref Disp::dIFile::reboundFile()
       */
     void OrbitalAnimationDriver::setSimulationData(QString filename, QString fileType, QString dataType, bool b) {
         orbitalAnimator->setLoading(true);
         orbitalAnimator->updateGL(); // makes display show the "Loading" message after the loading flag is set on previous line
         orbitalAnimator->setFullOrbit(b);
-        if (fileType == "SWIFT File") {
+        if (QString::compare(fileType,QString("Rebound"),Qt::CaseInsensitive) == 0) {
+            ReboundReader reboundFile(filename);
+            orbitalAnimator->updateSimulationCache(reboundFile.getData());
+        }
+        else if (QString::compare(fileType,QString("SWIFT"),Qt::CaseInsensitive) == 0) {
             SwiftReader swiftFile(filename);
             orbitalAnimator->updateSimulationCache(swiftFile.getData());
         }
-        else if (fileType == "dI File") {
+        else if (QString::compare(fileType,QString("dI"),Qt::CaseInsensitive) == 0) {
             DIReader dIFile(filename);
             orbitalAnimator->updateSimulationCache(dIFile.getData());
         }
@@ -171,9 +175,9 @@ namespace Disp
 
     int OrbitalAnimationDriver::getSimulationSize() { return orbitalAnimator->getSimulationSize(); }
 
-    void OrbitalAnimationDriver::performAction(QTableWidgetItem* a) {
-        if (a->column() == 0) orbitalAnimator->checkAndPerformAction(a);
-    }
+    /*void OrbitalAnimationDriver::performAction(QTableWidgetItem* a) {
+        if (a->column() == 0) orbitalAnimator->performAction(a);
+    }*/
 
     void OrbitalAnimationDriver::layoutControls()
     {
@@ -190,7 +194,7 @@ namespace Disp
         connect(orbitalAnimator->settingsDialog, SIGNAL(setXRot(double)), orbitalAnimator, SLOT(setXRot(double)));
         connect(orbitalAnimator->settingsDialog, SIGNAL(setYRot(double)), orbitalAnimator, SLOT(setYRot(double)));
         connect(orbitalAnimator->settingsDialog, SIGNAL(setZRot(double)), orbitalAnimator, SLOT(setZRot(double)));
-        connect(orbitalAnimator->settingsDialog, SIGNAL(setZoomFactor(int)), orbitalAnimator, SLOT(setZoomFactor(int)));
+        connect(orbitalAnimator->settingsDialog, SIGNAL(setZoomFactor(double)), orbitalAnimator, SLOT(setZoomFactor(double)));
         connect(orbitalAnimator->settingsDialog, SIGNAL(rotate()), orbitalAnimator, SLOT(rotate()));
         connect(orbitalAnimator->settingsDialog, SIGNAL(zoom()), orbitalAnimator, SLOT(zoom()));
         connect(orbitalAnimator->settingsDialog, SIGNAL(simulate()), orbitalAnimator, SLOT(simulate()));

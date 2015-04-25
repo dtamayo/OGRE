@@ -40,14 +40,63 @@
 #include <QtGui/QApplication>
 #include "OrbitalDisplays/MainWindow.h"
 #include <iostream>
+#include <QtCore/QDebug>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
+//#include <QCoreApplication>
+#include <QString>
+#include <QStringList>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    Disp::MainWindow window;
+    QCoreApplication::setApplicationName("OGRE");
+    QCoreApplication::setApplicationVersion("0.01");
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QCoreApplication::translate("main",
+    "Visualizer for orbit simulations"));
+
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    QCommandLineOption fileOption(QStringList() << "f" << "filename", QCoreApplication::translate("main", "Input file to load (Default is none--load within application)."), QCoreApplication::translate("main", "filename"), "");
+    parser.addOption(fileOption);
+    QCommandLineOption intOption(QStringList() << "i" << "integrator", QCoreApplication::translate("main", "Integrator used to generate input file (rebound, swift, dI). Default is rebound."), QCoreApplication::translate("main", "integrator"), "rebound");
+    parser.addOption(intOption);
+    /*QCommandLineOption typeOption(QStringList() << "t" << "type", QCoreApplication::translate("main", "Format of input file (osc or xyz). Default is osc."), QCoreApplication::translate("main", "type"), "osc");
+    parser.addOption(typeOption);*/
+
+    parser.process(a);
+
+    QString integrator = parser.value(intOption);
+
+    if(QString::compare(integrator, QString("rebound"), Qt::CaseInsensitive) != 0 && \
+            QString::compare(integrator, QString("swift"), Qt::CaseInsensitive) != 0 && \
+            QString::compare(integrator, QString("di"), Qt::CaseInsensitive) != 0)
+    {
+        fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "Error: integrator not supported. Must be rebound, swift, or dI")));
+        parser.showHelp(1);
+    }
+
+    // xyz option not implemented yet
+    /*QString type = parser.value(typeOption);
+
+    if(QString::compare(type, QString("osc"), Qt::CaseInsensitive) != 0 && \
+            QString::compare(integrator, QString("xyz"), Qt::CaseInsensitive) != 0)
+    {
+        fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "Error: Input file type not supported. Must be osc or xyz")));
+        parser.showHelp(1);
+    }*/
+
+    QString filename = parser.value(fileOption);
+
+    Disp::MainWindow window(filename, integrator);
 
     window.show();
+
+    //qDebug() << QCoreApplication::arguments().at(1);
 
     return a.exec();
 }

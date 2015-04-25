@@ -69,8 +69,8 @@
 
 struct Action
 {
-    int typ, dFrame, frame, span, queueIndex;
-    double dx, dy, dz, newScale, x, y, z, scale, prevScale;
+    int typ, dFrame, queueIndex, frame;
+    double dxrot, dyrot, dzrot, span, xrot, yrot, zrot, scale;
 };
 
 Q_DECLARE_METATYPE(Action)
@@ -85,8 +85,8 @@ class Queue : public QTableWidget
 public:
     Queue(int i, int j, QWidget* parent);
     void addActionToQueue(Action act);
-    void updateStates(int i, int j);
-    void calculateNextState(Action a1, Action& a2);
+    void updateQueue(int i, int j);
+    void syncAction(Action a1, Action& a2);
 
 public slots:
     void provideContextMenu(QPoint p);

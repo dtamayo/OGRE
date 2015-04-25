@@ -61,6 +61,14 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
     QWidget* form = new QWidget;
     QFormLayout* formLayout = new QFormLayout;
     QPushButton* add = new QPushButton("Add", this);
+
+    if (act.typ != INITIALIZE) { // INITIALIZE doesn't need to define the timespan
+        span = new QDoubleSpinBox;
+        span->setRange(0.001, 1000);
+        span->setMinimumWidth(81);
+        span->setValue(1);
+        formLayout->addRow("Span: ", span);
+    }
     switch (act.typ) {
     case ROTATE:
         first = new QDoubleSpinBox;
@@ -69,29 +77,26 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
         first->setRange(-180, 180);
         second->setRange(-180, 180);
         third->setRange(-180, 180);
-        formLayout->addRow("Rotate X by: ", first);
-        formLayout->addRow("Rotate Y by: ", second);
-        formLayout->addRow("Rotate Z by: ", third);
+        formLayout->addRow("Rotate X to: ", first);
+        formLayout->addRow("Rotate Y to: ", second);
+        formLayout->addRow("Rotate Z to: ", third);
         setWindowTitle("Rotate");
         break;
     case ZOOM:
         first = new QDoubleSpinBox;
         first->setRange(0.001, 5000);
         first->setValue(1);
-        formLayout->addRow("New Zoom Scale: ", first);
+        formLayout->addRow("New Zoom Factor: ", first);
         setWindowTitle("Zoom");
         break;
     case SIMULATE:
         fifth = new QSpinBox;
-        fifth->setRange(0, size);
-        formLayout->addRow("Advance frames by: ", fifth);
+        fifth->setRange(0, size-1); // min = current index, max = last index
+        formLayout->addRow("Advance to frame: ", fifth);
         setWindowTitle("Simulate");
         break;
     case PAUSE:
         setWindowTitle("Pause");
-        first = new QDoubleSpinBox;
-        first->setRange(0,1000);
-        formLayout->addRow("Pause duration (sec): ", first);
         break;
     case INITIALIZE:
         setWindowTitle("Initialize");
@@ -104,7 +109,7 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
         second->setRange(-180, 180);
         third->setRange(-180, 180);
         fourth->setRange(0.001, 5000);
-        fifth->setRange(0, size);
+        fifth->setRange(0, size-1);
         first->setValue(state[0]);
         second->setValue(state[1]);
         third->setValue(state[2]);
@@ -116,17 +121,14 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
         formLayout->addRow("Zoom scale: ", fourth);
         formLayout->addRow("Frame Number: ", fifth);
     }
-    if (act.typ != NO_ACTION && act.typ != INITIALIZE) { // if NO_ACTION or INITIALIZE, don't need to define the timespan or ask where to insert the action
-        span = new QDoubleSpinBox;
-        span->setRange(0.001, 1000);
-        span->setMinimumWidth(81);
-        span->setValue(1);
-        formLayout->addRow("Span (sec): ", span);
+
+    if (act.typ != INITIALIZE) { // INITIALIZE doesn't need to define where to insert the action
         insertRow = new QSpinBox;
         insertRow->setRange(1, numRows);
         insertRow->setValue(numRows);
         formLayout->addRow("Insert after row: ", insertRow);
     }
+
     form->setLayout(formLayout);
     mainLayout->addWidget(form);
     mainLayout->addWidget(add);
@@ -137,17 +139,16 @@ QueueActionDialog::QueueActionDialog(int type, int numRows, std::vector<double> 
 /*! @brief Adds all the user-selected values into the RobD::QueueActionDialog 's member variable act.  Called once the user clicks "Add" in the dialog.
 */
 void QueueActionDialog::setValues() {
-    act.span = act.typ == INITIALIZE ? 0 : span->value()*FPS;   // span = 0 if the action type is initialize, otherwise the value in the span widget
-                                                                // multiplied by the number of frames per second (span should hold # of frames, not sec)
+    act.span = act.typ == INITIALIZE ? 0 : span->value();   // span = 0 if the action type is initialize, otherwise the value in the span widget
     act.queueIndex = act.typ == INITIALIZE ? 0 : insertRow->value();
     switch(act.typ) {
-    case ROTATE: act.dx = first->value(); act.dy = second->value(); act.dz = third->value(); break;
-    case ZOOM: act.newScale = first->value(); break;
-    case SIMULATE: act.dFrame = fifth->value(); break;
+    case ROTATE: act.xrot = first->value(); act.yrot = second->value(); act.zrot = third->value(); break;
+    case ZOOM: act.scale = first->value(); break;
+    case SIMULATE: act.frame = fifth->value(); break;
     case INITIALIZE:
-        act.x = first->value();
-        act.y = second->value();
-        act.z = third->value();
+        act.xrot = first->value();
+        act.yrot = second->value();
+        act.zrot = third->value();
         act.scale = fourth->value();
         act.frame = fifth->value();
         break;

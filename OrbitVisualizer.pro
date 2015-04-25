@@ -12,4 +12,5 @@ DEPENDPATH += . ./OrbitalReaders ./OrbitalDisplays ./Eigen # ./ffmpeg
 include(OrbitalReaders/OrbitalReaders.pri)
 include(OrbitalDisplays/OrbitalDisplays.pri)
 include(Eigen/Eigen.pri)
+include(Helpers/Helpers.pri)
 #include(ffmpeg/ffmpeg.pri)

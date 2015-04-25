@@ -44,6 +44,7 @@
 #include "OrbitalReaders/DIReader.h"
 #include "OrbitalReaders/OrbitalDataCSVReader.h"
 #include "OrbitalReaders/SwiftReader.h"
+#include "OrbitalReaders/ReboundReader.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
 
@@ -57,7 +58,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtOpenGL/QGLFramebufferObject>
 
-#define FPS 24 // frames per second to be displayed in the application
+#define FPS 24. // frames per second to be displayed in the application
 
 namespace Disp
 {
@@ -104,7 +105,7 @@ namespace Disp
         OrbitalAnimatorSettings animatorSettings;
 
     public slots:
-        void performAction(QTableWidgetItem* a);
+        //void performAction(QTableWidgetItem* a);
 
     private slots:
         void handleAnimateChecked(bool val);

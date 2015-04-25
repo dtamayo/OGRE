@@ -36,14 +36,13 @@
 #ifndef ORBITAL_ANIMATOR_H
 #define ORBITAL_ANIMATOR_H
 
-#include "Point3d.h"
-#include "GLDrawingFunctions.h"
+#include "Helpers/Point3d.h"
+#include "Helpers/GLDrawingFunctions.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
 #include "QueueActionDialog.h"
 #include "OrbitalAnimationDriver.h"
-#include "Orbit.h"
-#include "Transforms.hpp"
+#include "Helpers/Orbit.h"
 #include <QtOpenGL/QGLWidget>
 #include <QFileDialog>
 #include <QtGui/QPainter>
@@ -51,7 +50,7 @@
 #include <QtGui/QWheelEvent>
 #include <QFontMetrics>
 #include <QtOpenGL/QGLFramebufferObject>
-#include <QtDebug>
+#include <QtCore/QDebug>
 #include <QMessageBox>
 #include <sstream>
 #include <algorithm>
@@ -107,6 +106,9 @@ namespace Disp
 
         QSize sizeHint() const { return QSize(800, 550); }
         void setFullOrbit(bool b) { drawFullOrbit = b; }
+        void setdrawParticles(bool b) { drawParticles = b; }
+        void setFillOrbits(bool b) { fillOrbits = b; }
+        void setdrawOrbitNormals(bool b) { drawOrbitNormals = b; }
         void setZoom(double zoomPercent) { scaleFactor = zoomPercent; updateGL(); }
         void updateOrRecord();
         void saveCurrentImage(int id);
@@ -123,7 +125,7 @@ namespace Disp
         void clearEclipticData();
         void clearAllData();
         void setLoading(bool b) { loading = b; }
-        void checkAndPerformAction(QTableWidgetItem* a);
+        //void performIntermediateAction(QTableWidgetItem* a);
         void playbackQueue(QTableWidget* queue);
         void record(QTableWidget* queue);
         double getXRotation() { return xrotation; }
@@ -141,7 +143,7 @@ namespace Disp
         void setXRot(double deg);
         void setYRot(double deg);
         void setZRot(double deg);
-        void setZoomFactor(int zoom);
+        void setZoomFactor(double zoom);
         void rotate();
         void zoom();
         void simulate();
@@ -158,7 +160,7 @@ namespace Disp
         enum Display { Pixmap, OpenGL };
         void performAction(Action a);
         void rotate(double x, double y, double z, int t);
-        void zoom(double a, int t);
+        void zoom(double a, double t);
         void simulate(int a, int t);
         void doNothing(int t);
         void initialize(double x, double y, double z, double sc, int fr);
@@ -202,6 +204,10 @@ namespace Disp
         int pictureNumber;
         int trailLength;
         bool drawFullOrbit;
+        bool fillOrbits;
+        bool drawParticles;
+        bool drawOrbitNormals;
+
     };
 } // namespace Disp
 

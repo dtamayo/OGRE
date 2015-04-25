@@ -44,7 +44,7 @@ namespace Disp {
   See individual methods for function and use.  MainWindow inherits from Qt's class QMainWindow.
   See @ref add2ndorb, modsetdiag, modqueue
 */
-    MainWindow::MainWindow() : QMainWindow()
+    MainWindow::MainWindow(QString filename, QString integrator) : QMainWindow()
     {
         queue = new Queue(0, 7, this);
         driver = new OrbitalAnimationDriver;
@@ -61,9 +61,13 @@ namespace Disp {
         setCentralWidget(main);
         setMinimumSize(800, 740);
         setWindowTitle("Orbit Simulator");
+
+        if(filename != ""){
+            openSimulation(filename, integrator, "", true);
+        }
     }
 
-    /*! @brief Opens a file dialog that asks the user to open a .dI file.
+    /*! @brief Opens a file dialog that asks the user to open an input file.
 
         Called from the file menu in the menu bar--File -> Open.  Clicking that button corresponds to the QAction
         openSimulationFile defined in MainWindow.h, which is connected to this function in RobD::MainWindow::makeConnections() (see @ref sigslots).
@@ -74,16 +78,19 @@ namespace Disp {
 
         @sa @ref addmenuitem, RobD::MainWindow::makeConnections(), RobD::MainWindow::createMenuOptions() and RobD::MainWindow::setupMenuOptions()
     */
-    void MainWindow::openSimulation() {
+    void MainWindow::openSimulationDialog() {
         OpenSimulationDialog dialog;
         if (dialog.exec() == QDialog::Accepted) {
-            driver->setSimulationData(dialog.getFileName(),
-                                      dialog.getFileType(),
-                                      dialog.getDataType(),
-                                      dialog.getDrawFullOrbit());
+            openSimulation(dialog.getFileName(),dialog.getFileType(),"",dialog.getDrawFullOrbit());
             simulationLoaded();
         }
     }
+
+    void MainWindow::openSimulation(QString filename, QString filetype, QString datatype, bool fullorbit) {
+        driver->setSimulationData(filename, filetype, datatype, fullorbit);
+        simulationLoaded();
+    }
+
 
     /*! @brief Opens a file dialog that asks the user to open a .csv file.
 
@@ -314,11 +321,6 @@ namespace Disp {
                                      driver->getState(),
                                      driver->getSimulationSize());
             if (dialog.exec() == QDialog::Accepted) {
-                if (dialog.act.typ != INITIALIZE) {
-                    QVariant v = queue->item(dialog.act.queueIndex - 1, 0)->data(Qt::UserRole);
-                    Action action = v.value<Action>();
-                    queue->calculateNextState(action, dialog.act);
-                }
                 queue->addActionToQueue(dialog.act);
             }
         }
@@ -423,7 +425,7 @@ namespace Disp {
         actionSelectorButton->addItem(tr("Rotate"), 0);
         actionSelectorButton->addItem(tr("Zoom"), 0);
         actionSelectorButton->addItem(tr("Simulate"), 0);
-        actionSelectorButton->addItem(tr("Do Nothing"), 0);
+        actionSelectorButton->addItem(tr("Pause"), 0);
         actionSelectorButton->addItem(tr("Initialize"), 0);
     }
 
@@ -569,7 +571,7 @@ namespace Disp {
         or in a member object's class.
     */
     void MainWindow::makeConnections() {
-        connect(openSimulationFile, SIGNAL(triggered()), this, SLOT(openSimulation()));
+        connect(openSimulationFile, SIGNAL(triggered()), this, SLOT(openSimulationDialog()));
         connect(openEquatorialFile, SIGNAL(triggered()), this, SLOT(openEquatorial()));
         connect(openEclipticFile, SIGNAL(triggered()), this, SLOT(openEcliptic()));
         connect(removeSimulationFile, SIGNAL(triggered()), this, SLOT(removeSimulation()));
@@ -581,8 +583,8 @@ namespace Disp {
         connect(dispCoords, SIGNAL(triggered()), this, SLOT(displayCoords()));
         connect(dispMainOrbit, SIGNAL(triggered()), this, SLOT(displayMainOrbit()));
         connect(dispSpinAxis, SIGNAL(triggered()), this, SLOT(displaySpinAxis()));
-        connect(queue, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
-                driver, SLOT(performAction(QTableWidgetItem*)));
+        /*connect(queue, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
+                driver, SLOT(performAction(QTableWidgetItem*)));*/
         connect(queue, SIGNAL(customContextMenuRequested(QPoint)), queue, SLOT(provideContextMenu(QPoint)));
         connect(playbackButton, SIGNAL(clicked()), this, SLOT(playbackQueue()));
         connect(recordButton, SIGNAL(clicked()), this, SLOT(record()));
