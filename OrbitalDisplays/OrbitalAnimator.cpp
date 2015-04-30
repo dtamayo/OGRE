@@ -58,9 +58,9 @@ namespace Disp
         , currentIndex(0)
         , simulationSize(0)
         , scaleFactor(1.)
-        , xrotation(0)
-        , yrotation(0)
-        , zrotation(0)
+        , xrotation(0.)
+        , yrotation(20.)
+        , zrotation(-15.)
         , centralBody(20, 20, 0)
         , loading(false)
         , recording(false)
@@ -68,7 +68,7 @@ namespace Disp
         , trailLength(60)
         , drawFullOrbit(false)
         , fillOrbits(false)
-        , drawParticles(true)
+        , drawParticles(false)
         , drawOrbitNormals(false)
     {
         QFont newFont(font());
@@ -123,7 +123,7 @@ namespace Disp
 
         glEnable(GL_LINE_SMOOTH);      
         glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-        glLineWidth(3.5);
+        glLineWidth(8.5);
     }
 
     /*! @brief Resizes the OpenGL viewport
@@ -240,6 +240,8 @@ namespace Disp
 
         if (loading) drawLoading<OpenGL>();
         if (!recording) drawStats<OpenGL>();
+
+        drawTime<OpenGL>();
         glPopMatrix();
     }
 
@@ -501,14 +503,14 @@ namespace Disp
         updateGL();
     }
 
-    /*! @brief Keeps rotation angles in the range [-180,180].
-    */
+    /* @brief Keeps rotation angles in the range [-180,180].
+
     void setNewRotation(double &rot, double dx) {
         double xtemp = rot + dx;
         if (xtemp > 180) rot = xtemp - 360;
         else if (xtemp < -180) rot = xtemp + 360;
         else rot = xtemp;
-    }
+    }*/
 
     /*! @brief Keeps rotation angles in the range [-180,180].
     */
@@ -578,9 +580,9 @@ namespace Disp
 
         This function increases the frame number of the simulation by "amt" over "time."
     */
-    void OrbitalAnimator::simulate(int amt, int time) {
+    void OrbitalAnimator::simulate(int frameFinal, int time) {
         int nFrames = int(time*FPS); // number of frames we need to create
-        double deltaFrame = amt/double(nFrames-1.);
+        double deltaFrame = double(frameFinal-currentIndex)/double(nFrames-1.);
         int indexInitial = currentIndex;
         for (int i=0; i < nFrames; i++) {
             currentIndex = int(round(indexInitial + i*deltaFrame));
@@ -607,6 +609,7 @@ namespace Disp
         zrotation = z;
         scaleFactor = sc;
         currentIndex = fr;
+        qDebug() << currentIndex;
         //settingsDialog->xRotationBox->setValue(xrotation);
         //settingsDialog->yRotationBox->setValue(yrotation);
         //settingsDialog->zRotationBox->setValue(zrotation);
@@ -815,7 +818,7 @@ namespace Disp
         renderText(topLeftX, fm->height() + topLeftY, str);
     }
 
-    /*! @brief Writes "Loading..." on the screen while a simulation is being loaded.
+    /*! @brief Writes time to the image.
 
         Called by OrbitalAnimator::paintGL()*/
     template<OrbitalAnimator::Display disp>
@@ -827,6 +830,22 @@ namespace Disp
         text = QString("Loading...");
         int textWidth = fm.width(text);
         drawText<disp>(text, width() - textWidth - 10, height() - 50, &fm);
+    }
+
+    /*! @brief Writes "Loading..." on the screen while a simulation is being loaded.
+
+        Called by OrbitalAnimator::paintGL()*/
+    template<OrbitalAnimator::Display disp>
+    void OrbitalAnimator::drawTime()
+    {
+        OrbitData::const_iterator itr = orbitData.begin();
+        double time = (itr->second)[currentIndex].time;
+        setTextColor<disp>(QColor(255, 255, 255, 255));
+        QFontMetrics fm(font());
+        QString text;
+        text = QString("%1 yrs").arg(int(time));
+        int textWidth = fm.width(text);
+        drawText<disp>(text, (width() - textWidth)/2. , 5, &fm);
     }
 
     /*! @brief Writes the rotation, zoom and frame values on the display.
@@ -947,6 +966,7 @@ namespace Disp
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             paintGL();
+
             buffer.release();
 
             /* the x264 codec requires that the images passed to it have even dimensions (e.g., 546x468).  So we first make a temporary pixmap to store the image,
@@ -962,6 +982,7 @@ namespace Disp
             QPainter painter(&p);
             painter.setFont(font());
             currentPainter = &painter;
+            drawTime<Pixmap>();
             currentPainter = 0;
 
             p.save(fname);

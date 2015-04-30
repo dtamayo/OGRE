@@ -171,6 +171,7 @@ namespace Disp
         void drawOrbitalNormal();
         template<Display> void drawStats();
         template<Display> void drawLoading();
+        template<Display> void drawTime();
         //void makeMovie(QString moviePath);
 
         // These functoins are meant to allow generalization of overlay painting

@@ -50,7 +50,7 @@ inline double RadToDeg(double rad) { return(rad*180/M_PI); }
 
 class Orbit {
 public:
-    Orbit() : hasCoords(false), hasOrbEls(false), color(1.0, 1.0, 0.0, 1.0), particleSize(0.0125) {}
+    Orbit() : hasCoords(false), hasOrbEls(false), color(0.0, 1.0, 0.0, 1.0), particleSize(0.03) {}
     void calculatePosition(double* cosfs, double* sinfs);
     void calculateOrbit(double* cosNus, double* sinfs);
     void convertOrbElsToPos(Point3d& v, double* cosfs, double* sinfs, double f);

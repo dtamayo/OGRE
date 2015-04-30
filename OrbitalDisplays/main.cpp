@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("OGRE");
-    QCoreApplication::setApplicationVersion("0.01");
+    QCoreApplication::setApplicationVersion("0.02");
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::translate("main",
