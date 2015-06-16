@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("OGRE");
-    QCoreApplication::setApplicationVersion("0.01");
+    QCoreApplication::setApplicationVersion("0.02");
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::translate("main",
@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
     parser.addOption(fileOption);
     QCommandLineOption intOption(QStringList() << "i" << "integrator", QCoreApplication::translate("main", "Integrator used to generate input file (rebound, swift, dI). Default is rebound."), QCoreApplication::translate("main", "integrator"), "rebound");
     parser.addOption(intOption);
-    /*QCommandLineOption typeOption(QStringList() << "t" << "type", QCoreApplication::translate("main", "Format of input file (osc or xyz). Default is osc."), QCoreApplication::translate("main", "type"), "osc");
-    parser.addOption(typeOption);*/
+    QCommandLineOption typeOption(QStringList() << "t" << "type", QCoreApplication::translate("main", "Format of input file (osc or xyz). Default is osc."), QCoreApplication::translate("main", "type"), "osc");
+    parser.addOption(typeOption);
 
     parser.process(a);
 
@@ -80,19 +80,18 @@ int main(int argc, char *argv[])
         parser.showHelp(1);
     }
 
-    // xyz option not implemented yet
-    /*QString type = parser.value(typeOption);
+    QString type = parser.value(typeOption);
 
     if(QString::compare(type, QString("osc"), Qt::CaseInsensitive) != 0 && \
-            QString::compare(integrator, QString("xyz"), Qt::CaseInsensitive) != 0)
+            QString::compare(type, QString("xyz"), Qt::CaseInsensitive) != 0)
     {
         fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "Error: Input file type not supported. Must be osc or xyz")));
         parser.showHelp(1);
-    }*/
+    }
 
     QString filename = parser.value(fileOption);
 
-    Disp::MainWindow window(filename, integrator);
+    Disp::MainWindow window(filename, integrator, type);
 
     window.show();
 

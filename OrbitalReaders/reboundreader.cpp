@@ -39,7 +39,7 @@
 #define SEPARATOR "\\s*"
 #define DECIMAL_FIELD_REXP "([0-9\\.eE\\-\\+]*)"
 
-ReboundReader::ReboundReader(QString filename)
+ReboundReader::ReboundReader(QString filename, QString dataType)
     : lineParser(
         SEPARATOR DECIMAL_FIELD_REXP
         SEPARATOR DECIMAL_FIELD_REXP
@@ -58,13 +58,18 @@ ReboundReader::ReboundReader(QString filename)
         if (file.open(QFile::ReadOnly | QFile::Text))
         {
             QTextStream stream(&file);
-            readResults(stream);
+            if(QString::compare(dataType,QString("xyz"),Qt::CaseInsensitive) == 0){
+                readXYZ(stream);
+            }
+            else{
+                readOsc(stream);
+            }
             file.close();
         }
     }
 }
 
-void ReboundReader::readResults(QTextStream& stream)
+void ReboundReader::readOsc(QTextStream& stream)
 {
     QString line;
     int lineNum = 0;
@@ -94,6 +99,42 @@ void ReboundReader::readResults(QTextStream& stream)
             d.P = decimals.at(9).toDouble(&ok); HANDLE_ERROR(9);
             d.f = 180./M_PI*decimals.at(10).toDouble(&ok); HANDLE_ERROR(10);
             d.hasOrbEls = true;
+            data[d.particleID].push_back(d);
+        }
+    }
+}
+
+void ReboundReader::readXYZ(QTextStream& stream)
+{
+    QString line;
+    int lineNum = 0;
+    while (!stream.atEnd())
+    {
+        line = stream.readLine();
+        ++lineNum;
+        if (lineParser.exactMatch(line))
+        {
+            QStringList decimals = lineParser.capturedTexts();
+            Orbit d;
+            bool ok = true;
+            #define HANDLE_ERROR(index) \
+                if (!ok) { \
+                std::ostringstream os; \
+                os << "Could not decode decimal " << decimals.at(index).toLatin1().data(); \
+                throw std::runtime_error(os.str()); \
+                }
+            d.time = decimals.at(1).toDouble(&ok); HANDLE_ERROR(1);
+            d.particleID = decimals.at(2).toDouble(&ok); HANDLE_ERROR(2);
+            d.r[0] = decimals.at(3).toDouble(&ok); HANDLE_ERROR(3);
+            d.r[1] = decimals.at(4).toDouble(&ok); HANDLE_ERROR(4);
+            d.r[2] = decimals.at(5).toDouble(&ok); HANDLE_ERROR(5);
+            d.v[0] = decimals.at(6).toDouble(&ok); HANDLE_ERROR(6);
+            d.v[1] = decimals.at(7).toDouble(&ok); HANDLE_ERROR(7);
+            d.v[2] = decimals.at(8).toDouble(&ok); HANDLE_ERROR(8);
+            d.hasOrbEls = false;
+            d.posInPlane.x = d.r[0];
+            d.posInPlane.y = d.r[1];
+            d.posInPlane.z = d.r[2];
             data[d.particleID].push_back(d);
         }
     }

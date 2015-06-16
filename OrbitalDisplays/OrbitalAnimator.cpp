@@ -58,9 +58,9 @@ namespace Disp
         , currentIndex(0)
         , simulationSize(0)
         , scaleFactor(1.)
-        , xrotation(0)
-        , yrotation(0)
-        , zrotation(0)
+        , xrotation(0.)
+        , yrotation(20.)
+        , zrotation(-15.)
         , centralBody(20, 20, 0)
         , loading(false)
         , recording(false)
@@ -83,7 +83,25 @@ namespace Disp
         prepfs();
         setMouseTracking(true);
         connect(&settings, SIGNAL(changed()), this, SLOT(updateGL()));
+
+        //orbitalAnimator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); // Expanding fills up as much space as available
+
+        /*QSizePolicy spol (QSizePolicy::Fixed, QSizePolicy::Fixed); // sets it to value you give
+        spol.setHeightForWidth(true);
+        setSizePolicy(spol); // this is for setting fixed aspect ratio */
     }
+
+    int OrbitalAnimator::heightForWidth(int width) const
+    {
+        return width;
+    }
+    QSize OrbitalAnimator::sizeHint() const
+    {
+       int w = 550;
+       return QSize( 800, 550);
+       //return QSize( w, heightForWidth(w) );
+    }
+
 
     /*! @brief Initializes the settings dialog
 
@@ -123,7 +141,7 @@ namespace Disp
 
         glEnable(GL_LINE_SMOOTH);      
         glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-        glLineWidth(3.5);
+        glLineWidth(8.5);
     }
 
     /*! @brief Resizes the OpenGL viewport
@@ -134,8 +152,9 @@ namespace Disp
         matrix and the specific commands implemented below.
     */
     void OrbitalAnimator::resizeGL(int w, int h) {
-        int newDim = std::min(w, h);
-        glViewport(0, 0, (GLint)newDim, (GLint)newDim);
+        //int newDim = std::min(w, h);
+        //glViewport(0, 0, (GLint)newDim, (GLint)newDim);
+        glViewport(0, 0, w, h);
     }
 
     /*! @brief Renders the scene
@@ -156,14 +175,14 @@ namespace Disp
         double orbitYScaleFactor = maximum.y - minimum.y;
         double orbitZScaleFactor = maximum.z - minimum.z;
         double maxscale = std::max(orbitXScaleFactor, std::max(orbitYScaleFactor, orbitZScaleFactor));
-        double orbitScaleFactor = ((maxscale==0) ? 1. : 1./maxscale);
-        //qDebug() << orbitScaleFactor << scaleFactor << scaleFactor * orbitScaleFactor;
+        double orbitScaleFactor = ((maxscale == 0) ? 1. : 1./maxscale);
         glScalef(scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor);
         glRotatef(-90, 1, 0, 0); // Change x-y orbital plane to x-z Display plane for display
         glRotatef(-90, 0, 0, 1);
         glRotatef(xrotation, 1, 0, 0);
         glRotatef(yrotation, 0, 1, 0);
         glRotatef(zrotation, 0, 0, 1);
+
         if (settings.displayCoords() && simulationDataLoaded) drawCoords(coordLength);
 
         glPushMatrix();
@@ -222,6 +241,7 @@ namespace Disp
                 drawOrbitalNormal();
             }
             glPopMatrix();
+            drawTime<OpenGL>();
         }
 /*
         if(settings.displaySpinAxis() && simulationDataLoaded)
@@ -240,6 +260,7 @@ namespace Disp
 
         if (loading) drawLoading<OpenGL>();
         if (!recording) drawStats<OpenGL>();
+
         glPopMatrix();
     }
 
@@ -277,9 +298,11 @@ namespace Disp
                           (itr->second)[currentIndex].color.g,
                           (itr->second)[currentIndex].color.b,
                           (itr->second)[currentIndex].color.alpha);
-                glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
-                glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
-                glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                if((itr->second)[currentIndex].hasOrbEls == true){
+                    glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
+                    glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
+                    glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                }
                 glTranslatef((itr->second)[currentIndex].posInPlane.x,
                              (itr->second)[currentIndex].posInPlane.y,
                              (itr->second)[currentIndex].posInPlane.z);
@@ -410,15 +433,20 @@ namespace Disp
     */
     void OrbitalAnimator::updateSimulationCache(OrbitData const& d) {
         orbitData = d;
+
         if (nothingLoaded()) { maximum = Point3d::minPoint(); minimum = Point3d::maxPoint(); }
+
         simulationSize = 0;
         for (OrbitData::iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) {
             for (size_t i = 0; i < (itr->second).size(); i++) {
-                if (!drawFullOrbit) (itr->second)[i].calculatePosition(cosfs, sinfs);
-                else (itr->second)[i].calculateOrbit(cosfs, sinfs);
+                if ((itr->second)[i].hasOrbEls){
+                    if (!drawFullOrbit) (itr->second)[i].calculatePosition(cosfs, sinfs);
+                    else (itr->second)[i].calculateOrbit(cosfs, sinfs);
+                }
                 if (nothingLoaded()) {
                     minimum = findMin((itr->second)[i].posInPlane, minimum);
                     maximum = findMax((itr->second)[i].posInPlane, maximum);
+                    //qDebug() << minimum.x << maximum.x;
                 }
             }
             if ((itr->second).size() > (size_t)simulationSize) simulationSize = (itr->second).size();
@@ -501,14 +529,14 @@ namespace Disp
         updateGL();
     }
 
-    /*! @brief Keeps rotation angles in the range [-180,180].
-    */
+    /* @brief Keeps rotation angles in the range [-180,180].
+
     void setNewRotation(double &rot, double dx) {
         double xtemp = rot + dx;
         if (xtemp > 180) rot = xtemp - 360;
         else if (xtemp < -180) rot = xtemp + 360;
         else rot = xtemp;
-    }
+    }*/
 
     /*! @brief Keeps rotation angles in the range [-180,180].
     */
@@ -578,9 +606,9 @@ namespace Disp
 
         This function increases the frame number of the simulation by "amt" over "time."
     */
-    void OrbitalAnimator::simulate(int amt, int time) {
+    void OrbitalAnimator::simulate(int frameFinal, int time) {
         int nFrames = int(time*FPS); // number of frames we need to create
-        double deltaFrame = amt/double(nFrames-1.);
+        double deltaFrame = double(frameFinal-currentIndex)/double(nFrames-1.);
         int indexInitial = currentIndex;
         for (int i=0; i < nFrames; i++) {
             currentIndex = int(round(indexInitial + i*deltaFrame));
@@ -607,6 +635,7 @@ namespace Disp
         zrotation = z;
         scaleFactor = sc;
         currentIndex = fr;
+        qDebug() << currentIndex;
         //settingsDialog->xRotationBox->setValue(xrotation);
         //settingsDialog->yRotationBox->setValue(yrotation);
         //settingsDialog->zRotationBox->setValue(zrotation);
@@ -815,7 +844,7 @@ namespace Disp
         renderText(topLeftX, fm->height() + topLeftY, str);
     }
 
-    /*! @brief Writes "Loading..." on the screen while a simulation is being loaded.
+    /*! @brief Writes "Loading" while a simulation is being loaded.
 
         Called by OrbitalAnimator::paintGL()*/
     template<OrbitalAnimator::Display disp>
@@ -827,6 +856,22 @@ namespace Disp
         text = QString("Loading...");
         int textWidth = fm.width(text);
         drawText<disp>(text, width() - textWidth - 10, height() - 50, &fm);
+    }
+
+    /*! @brief Writes the time to the frame.
+
+        Called by OrbitalAnimator::paintGL()*/
+    template<OrbitalAnimator::Display disp>
+    void OrbitalAnimator::drawTime()
+    {
+        OrbitData::const_iterator itr = orbitData.begin();
+        double time = (itr->second)[currentIndex].time;
+        setTextColor<disp>(QColor(255, 255, 255, 255));
+        QFontMetrics fm(font());
+        QString text;
+        text = QString("%1 yrs").arg(int(time));
+        int textWidth = fm.width(text);
+        drawText<disp>(text, (width() - textWidth)/2. , 5, &fm);
     }
 
     /*! @brief Writes the rotation, zoom and frame values on the display.
@@ -947,6 +992,7 @@ namespace Disp
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             paintGL();
+
             buffer.release();
 
             /* the x264 codec requires that the images passed to it have even dimensions (e.g., 546x468).  So we first make a temporary pixmap to store the image,
@@ -962,6 +1008,7 @@ namespace Disp
             QPainter painter(&p);
             painter.setFont(font());
             currentPainter = &painter;
+            drawTime<Pixmap>();
             currentPainter = 0;
 
             p.save(fname);

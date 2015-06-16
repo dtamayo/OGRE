@@ -43,8 +43,8 @@ OpenSimulationDialog::OpenSimulationDialog() : QDialog() {
     selectFileType->addItem("SWIFT", 0);
     selectFileType->addItem("dI", 0);
     selectDataType = new QComboBox;
-    //selectDataType->addItem("Orbital Elements");
-    //selectDataType->addItem("XYZ");
+    selectDataType->addItem("Orbital Elements");
+    selectDataType->addItem("XYZ");
     QHBoxLayout* fileSelectorLayout = new QHBoxLayout;
     fileSelector = new QLineEdit;
     QPushButton* browse = new QPushButton("Browse", this);
@@ -52,7 +52,7 @@ OpenSimulationDialog::OpenSimulationDialog() : QDialog() {
     fileSelectorLayout->addWidget(browse);
     drawFullOrbit = new QCheckBox;
     form->addRow("Select file type: ", selectFileType);
-    //form->addRow("Select data type: ", selectDataType);
+    form->addRow("Select data type: ", selectDataType);
     form->addRow("Select file: ", fileSelectorLayout);
     form->addRow("Draw full orbit: ", drawFullOrbit);
     QHBoxLayout* buttons = new QHBoxLayout;

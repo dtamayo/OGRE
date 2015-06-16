@@ -104,7 +104,8 @@ namespace Disp
             @see setSimulationData()
         */
 
-        QSize sizeHint() const { return QSize(800, 550); }
+        int heightForWidth( int width ) const;
+        QSize sizeHint() const;
         void setFullOrbit(bool b) { drawFullOrbit = b; }
         void setdrawParticles(bool b) { drawParticles = b; }
         void setFillOrbits(bool b) { fillOrbits = b; }
@@ -171,6 +172,7 @@ namespace Disp
         void drawOrbitalNormal();
         template<Display> void drawStats();
         template<Display> void drawLoading();
+        template<Display> void drawTime();
         //void makeMovie(QString moviePath);
 
         // These functoins are meant to allow generalization of overlay painting

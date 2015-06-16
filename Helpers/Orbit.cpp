@@ -48,7 +48,7 @@ void Orbit::convertOrbElsToPos(Point3d& v, double* cosfs, double* sinfs, double 
 }
 
 void Orbit::calculatePosition(double* cosfs, double* sinfs) {
-    if (hasOrbEls) { convertOrbElsToPos(posInPlane, cosfs, sinfs, f); hasCoords = true; }
+    convertOrbElsToPos(posInPlane, cosfs, sinfs, f); hasCoords = true;
 }
 
 void Orbit::calculateOrbit(double* cosfs, double* sinfs) {

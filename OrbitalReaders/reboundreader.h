@@ -17,11 +17,12 @@
 class ReboundReader
 {
 public:
-    ReboundReader(QString filename);
+    ReboundReader(QString filename, QString dataType);
     OrbitData const& getData() const { return data; }
 
 private:
-    void readResults(QTextStream& stream);
+    void readOsc(QTextStream& stream);
+    void readXYZ(QTextStream& stream);
 
     QRegExp lineParser;
     OrbitData data;
