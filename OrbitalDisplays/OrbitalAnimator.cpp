@@ -68,7 +68,7 @@ namespace Disp
         , trailLength(60)
         , drawFullOrbit(false)
         , fillOrbits(false)
-        , drawParticles(false)
+        , drawParticles(true)
         , drawOrbitNormals(false)
     {
         QFont newFont(font());
@@ -83,7 +83,25 @@ namespace Disp
         prepfs();
         setMouseTracking(true);
         connect(&settings, SIGNAL(changed()), this, SLOT(updateGL()));
+
+        //orbitalAnimator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); // Expanding fills up as much space as available
+
+        /*QSizePolicy spol (QSizePolicy::Fixed, QSizePolicy::Fixed); // sets it to value you give
+        spol.setHeightForWidth(true);
+        setSizePolicy(spol); // this is for setting fixed aspect ratio */
     }
+
+    int OrbitalAnimator::heightForWidth(int width) const
+    {
+        return width;
+    }
+    QSize OrbitalAnimator::sizeHint() const
+    {
+       int w = 550;
+       return QSize( 800, 550);
+       //return QSize( w, heightForWidth(w) );
+    }
+
 
     /*! @brief Initializes the settings dialog
 
@@ -134,8 +152,9 @@ namespace Disp
         matrix and the specific commands implemented below.
     */
     void OrbitalAnimator::resizeGL(int w, int h) {
-        int newDim = std::min(w, h);
-        glViewport(0, 0, (GLint)newDim, (GLint)newDim);
+        //int newDim = std::min(w, h);
+        //glViewport(0, 0, (GLint)newDim, (GLint)newDim);
+        glViewport(0, 0, w, h);
     }
 
     /*! @brief Renders the scene
@@ -156,14 +175,14 @@ namespace Disp
         double orbitYScaleFactor = maximum.y - minimum.y;
         double orbitZScaleFactor = maximum.z - minimum.z;
         double maxscale = std::max(orbitXScaleFactor, std::max(orbitYScaleFactor, orbitZScaleFactor));
-        double orbitScaleFactor = ((maxscale==0) ? 1. : 1./maxscale);
-        //qDebug() << orbitScaleFactor << scaleFactor << scaleFactor * orbitScaleFactor;
+        double orbitScaleFactor = ((maxscale == 0) ? 1. : 1./maxscale);
         glScalef(scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor, scaleFactor * orbitScaleFactor);
         glRotatef(-90, 1, 0, 0); // Change x-y orbital plane to x-z Display plane for display
         glRotatef(-90, 0, 0, 1);
         glRotatef(xrotation, 1, 0, 0);
         glRotatef(yrotation, 0, 1, 0);
         glRotatef(zrotation, 0, 0, 1);
+
         if (settings.displayCoords() && simulationDataLoaded) drawCoords(coordLength);
 
         glPushMatrix();
@@ -222,6 +241,7 @@ namespace Disp
                 drawOrbitalNormal();
             }
             glPopMatrix();
+            drawTime<OpenGL>();
         }
 /*
         if(settings.displaySpinAxis() && simulationDataLoaded)
@@ -241,7 +261,6 @@ namespace Disp
         if (loading) drawLoading<OpenGL>();
         if (!recording) drawStats<OpenGL>();
 
-        drawTime<OpenGL>();
         glPopMatrix();
     }
 
@@ -279,9 +298,11 @@ namespace Disp
                           (itr->second)[currentIndex].color.g,
                           (itr->second)[currentIndex].color.b,
                           (itr->second)[currentIndex].color.alpha);
-                glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
-                glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
-                glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                if((itr->second)[currentIndex].hasOrbEls == true){
+                    glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
+                    glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
+                    glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
+                }
                 glTranslatef((itr->second)[currentIndex].posInPlane.x,
                              (itr->second)[currentIndex].posInPlane.y,
                              (itr->second)[currentIndex].posInPlane.z);
@@ -412,15 +433,20 @@ namespace Disp
     */
     void OrbitalAnimator::updateSimulationCache(OrbitData const& d) {
         orbitData = d;
+
         if (nothingLoaded()) { maximum = Point3d::minPoint(); minimum = Point3d::maxPoint(); }
+
         simulationSize = 0;
         for (OrbitData::iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) {
             for (size_t i = 0; i < (itr->second).size(); i++) {
-                if (!drawFullOrbit) (itr->second)[i].calculatePosition(cosfs, sinfs);
-                else (itr->second)[i].calculateOrbit(cosfs, sinfs);
+                if ((itr->second)[i].hasOrbEls){
+                    if (!drawFullOrbit) (itr->second)[i].calculatePosition(cosfs, sinfs);
+                    else (itr->second)[i].calculateOrbit(cosfs, sinfs);
+                }
                 if (nothingLoaded()) {
                     minimum = findMin((itr->second)[i].posInPlane, minimum);
                     maximum = findMax((itr->second)[i].posInPlane, maximum);
+                    //qDebug() << minimum.x << maximum.x;
                 }
             }
             if ((itr->second).size() > (size_t)simulationSize) simulationSize = (itr->second).size();
@@ -818,7 +844,7 @@ namespace Disp
         renderText(topLeftX, fm->height() + topLeftY, str);
     }
 
-    /*! @brief Writes time to the image.
+    /*! @brief Writes "Loading" while a simulation is being loaded.
 
         Called by OrbitalAnimator::paintGL()*/
     template<OrbitalAnimator::Display disp>
@@ -832,7 +858,7 @@ namespace Disp
         drawText<disp>(text, width() - textWidth - 10, height() - 50, &fm);
     }
 
-    /*! @brief Writes "Loading..." on the screen while a simulation is being loaded.
+    /*! @brief Writes the time to the frame.
 
         Called by OrbitalAnimator::paintGL()*/
     template<OrbitalAnimator::Display disp>

@@ -104,7 +104,8 @@ namespace Disp
             @see setSimulationData()
         */
 
-        QSize sizeHint() const { return QSize(800, 550); }
+        int heightForWidth( int width ) const;
+        QSize sizeHint() const;
         void setFullOrbit(bool b) { drawFullOrbit = b; }
         void setdrawParticles(bool b) { drawParticles = b; }
         void setFillOrbits(bool b) { fillOrbits = b; }

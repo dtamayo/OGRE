@@ -98,7 +98,7 @@ namespace Disp
         orbitalAnimator->updateGL(); // makes display show the "Loading" message after the loading flag is set on previous line
         orbitalAnimator->setFullOrbit(b);
         if (QString::compare(fileType,QString("Rebound"),Qt::CaseInsensitive) == 0) {
-            ReboundReader reboundFile(filename);
+            ReboundReader reboundFile(filename, dataType);
             orbitalAnimator->updateSimulationCache(reboundFile.getData());
         }
         else if (QString::compare(fileType,QString("SWIFT"),Qt::CaseInsensitive) == 0) {
@@ -181,7 +181,6 @@ namespace Disp
 
     void OrbitalAnimationDriver::layoutControls()
     {
-        orbitalAnimator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         QVBoxLayout* mainLayout = new QVBoxLayout;
         mainLayout->addWidget(orbitalAnimator);
         mainLayout->setMargin(0);

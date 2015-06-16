@@ -66,7 +66,7 @@ namespace Disp
     {
     Q_OBJECT
     public:
-        MainWindow(QString filename, QString integrator);
+        MainWindow(QString filename, QString integrator, QString type);
         void setupUI();
 
     private slots:
