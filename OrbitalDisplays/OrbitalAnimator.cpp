@@ -635,7 +635,7 @@ namespace Disp
         zrotation = z;
         scaleFactor = sc;
         currentIndex = fr;
-        qDebug() << currentIndex;
+        //qDebug() << currentIndex;
         //settingsDialog->xRotationBox->setValue(xrotation);
         //settingsDialog->yRotationBox->setValue(yrotation);
         //settingsDialog->zRotationBox->setValue(zrotation);
@@ -755,7 +755,7 @@ namespace Disp
     */
     void OrbitalAnimator::updateOrRecord() {
         if (recording) {
-            saveCurrentImage(pictureNumber);
+            saveCurrentImage();
             pictureNumber++;
         }
         else updateGL();
@@ -971,7 +971,7 @@ namespace Disp
         Called by OrbitalAnimator::updateOrRecord()
     */
 
-    void OrbitalAnimator::saveCurrentImage(int id)
+    void OrbitalAnimator::saveCurrentImage()
     {
         QString fileNameTemplate("orb%1.png");
         if (tmpPNGFolder.exists())

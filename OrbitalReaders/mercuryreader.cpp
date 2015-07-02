@@ -38,8 +38,9 @@
 
 #define SEPARATOR "\\s*"
 #define DECIMAL_FIELD_REXP "([0-9\\.eE\\-\\+]*)"
+#define MAX_MERCURY_PLANETS 10
 
-MercuryReader::MercuryReader(QString filename, QString dataType)
+MercuryReader::MercuryReader(QString dirName, QString dataType)
     : lineParser(
         SEPARATOR DECIMAL_FIELD_REXP
         SEPARATOR DECIMAL_FIELD_REXP
@@ -49,19 +50,37 @@ MercuryReader::MercuryReader(QString filename, QString dataType)
         SEPARATOR DECIMAL_FIELD_REXP
         SEPARATOR DECIMAL_FIELD_REXP)
 {
-    if(filename.length() > 0)
+    if(dirName.length() > 0)
     {
-        QFile file(filename);
-        if (file.open(QFile::ReadOnly | QFile::Text))
-        {
-            QTextStream stream(&file);
-            if(QString::compare(dataType,QString("xyz"),Qt::CaseInsensitive) == 0){
-                readXYZ(stream, 0);
+        QDir dir(dirName);
+        QString filenametemplate("PLANET%1");
+        if(dir.exists()){
+            filenametemplate = dir.absolutePath() + QString("/") + filenametemplate;
+            for(int i=0; i < MAX_MERCURY_PLANETS;i++){
+                QString filename = filenametemplate.arg(i,2,'f',0,'0');
+                if(QString::compare(dataType,QString("xyz"),Qt::CaseInsensitive) == 0){
+                    QFile file(filename + ".xyz");
+                    if (file.open(QFile::ReadOnly | QFile::Text))
+                    {
+                        QTextStream stream(&file);
+                        readXYZ(stream, i);
+                    }
+                    file.close();
+                }
+                else{
+                    QFile file(filename + ".aei");
+                    if (file.open(QFile::ReadOnly | QFile::Text))
+                    {
+                        QTextStream stream(&file);
+                        readOsc(stream, i);
+                    }
+                    file.close();
+                }
+
             }
-            else{
-                readOsc(stream, 0);
-            }
-            file.close();
+        }
+        else{
+            qDebug() << "Directory does not exist";
         }
     }
 }

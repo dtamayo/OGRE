@@ -112,7 +112,7 @@ namespace Disp
         void setdrawOrbitNormals(bool b) { drawOrbitNormals = b; }
         void setZoom(double zoomPercent) { scaleFactor = zoomPercent; updateGL(); }
         void updateOrRecord();
-        void saveCurrentImage(int id);
+        void saveCurrentImage();
         bool simulationDataLoaded;
         bool equatorialDataLoaded;
         bool eclipticDataLoaded;

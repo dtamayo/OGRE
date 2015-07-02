@@ -3,6 +3,7 @@
 
 #include <QtCore/QRegExp>
 #include <QtCore/QFile>
+#include <QtCore/QDir>
 #include <QtCore/QStringList>
 #include <QtCore/QTextStream>
 #include <QtCore/QDebug>
@@ -17,7 +18,7 @@
 class MercuryReader
 {
 public:
-    MercuryReader(QString filename, QString dataType);
+    MercuryReader(QString dirName, QString dataType);
     OrbitData const& getData() const { return data; }
 
 private:
