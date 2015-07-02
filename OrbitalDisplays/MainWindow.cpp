@@ -44,7 +44,7 @@ namespace Disp {
   See individual methods for function and use.  MainWindow inherits from Qt's class QMainWindow.
   See @ref add2ndorb, modsetdiag, modqueue
 */
-    MainWindow::MainWindow(QString filename, QString integrator, QString type) : QMainWindow()
+    MainWindow::MainWindow(QString filename, QString integrator, QString type, bool drawFullOrbit) : QMainWindow()
     {
         queue = new Queue(0, 7, this);
         driver = new OrbitalAnimationDriver;
@@ -63,7 +63,7 @@ namespace Disp {
         setWindowTitle("Orbit Simulator");
 
         if(filename != ""){
-            openSimulation(filename, integrator, type, true);
+            openSimulation(filename, integrator, type, drawFullOrbit);
         }
     }
 
@@ -86,8 +86,8 @@ namespace Disp {
         }
     }
 
-    void MainWindow::openSimulation(QString filename, QString filetype, QString datatype, bool fullorbit) {
-        driver->setSimulationData(filename, filetype, datatype, fullorbit);
+    void MainWindow::openSimulation(QString filename, QString filetype, QString datatype, bool drawFullOrbit) {
+        driver->setSimulationData(filename, filetype, datatype, drawFullOrbit);
         simulationLoaded();
     }
 

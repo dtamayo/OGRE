@@ -96,61 +96,61 @@ void drawsphere(int sectors, int rings, int radius)
 }
 
 // Modified from http://www.gamedev.net/topic/537269-procedural-sphere-creation/
-Sphere::Sphere(int sectors_, int rings_, int radius_)
+Sphere::Sphere(int sectors_, int rings_, double radius_)
 	: sectors(sectors_)
 	, rings(rings_)
 {
 	updateRadius(radius_);
+    float theta, phi;
+    int i, j, t;
+
+    int nvec = (rings-2)* sectors+2;
+    ntri = (rings-2)*(sectors-1)*2;
+
+    dat.resize(nvec * 3);
+    idx.resize(ntri * 3);
+
+    for (t=0, j=1; j < rings-1; ++j)
+    {
+        for (i=0; i < sectors; ++i)
+        {
+            theta = float(j)/(rings-1) * M_PI;
+            phi   = float(i)/(sectors-1) * M_PI*2;
+            dat[t++] =  sinf(theta) * cosf(phi);
+            dat[t++] =  cosf(theta);
+            dat[t++] = -sinf(theta) * sinf(phi);
+        }
+    }
+    dat[t++]=0; dat[t++]= 1; dat[t++]=0;
+    dat[t++]=0; dat[t++]=-1; dat[t++]=0;
+
+    for( t=0, j=0; j<rings-3; j++ )
+    {
+        for( i=0; i<sectors-1; i++ )
+        {
+            idx[t++] = (j  )*sectors + i  ;
+            idx[t++] = (j+1)*sectors + i+1;
+            idx[t++] = (j  )*sectors + i+1;
+            idx[t++] = (j  )*sectors + i  ;
+            idx[t++] = (j+1)*sectors + i  ;
+            idx[t++] = (j+1)*sectors + i+1;
+        }
+    }
+    for( i=0; i<sectors-1; i++ )
+    {
+        idx[t++] = (rings-2)*sectors;
+        idx[t++] = i;
+        idx[t++] = i+1;
+        idx[t++] = (rings-2)*sectors+1;
+        idx[t++] = (rings-3)*sectors + i+1;
+        idx[t++] = (rings-3)*sectors + i;
+    }
 }
 
 // Modified from http://www.gamedev.net/topic/537269-procedural-sphere-creation/
-void Sphere::updateRadius(int radius_)
+void Sphere::updateRadius(double radius_)
 {
 	radius = radius_;
-	float theta, phi;
-	int i, j, t;
-
-	int nvec = (rings-2)* sectors+2;
-	ntri = (rings-2)*(sectors-1)*2;
-
-	dat.resize(nvec * 3);
-	idx.resize(ntri * 3);
-
-	for (t=0, j=1; j < rings-1; ++j)
-	{
-		for (i=0; i < sectors; ++i)
-		{
-            theta = float(j)/(rings-1) * M_PI;
-            phi   = float(i)/(sectors-1) * M_PI*2;
-			dat[t++] =  sinf(theta) * cosf(phi);
-			dat[t++] =  cosf(theta);
-			dat[t++] = -sinf(theta) * sinf(phi);
-		}
-	}
-	dat[t++]=0; dat[t++]= 1; dat[t++]=0;
-	dat[t++]=0; dat[t++]=-1; dat[t++]=0;
-
-	for( t=0, j=0; j<rings-3; j++ )
-	{
-        for( i=0; i<sectors-1; i++ )
-		{
-			idx[t++] = (j  )*sectors + i  ;
-			idx[t++] = (j+1)*sectors + i+1;
-			idx[t++] = (j  )*sectors + i+1;
-			idx[t++] = (j  )*sectors + i  ;
-			idx[t++] = (j+1)*sectors + i  ;
-			idx[t++] = (j+1)*sectors + i+1;
-		}
-	}
-	for( i=0; i<sectors-1; i++ )
-	{
-		idx[t++] = (rings-2)*sectors;
-		idx[t++] = i;
-		idx[t++] = i+1;
-		idx[t++] = (rings-2)*sectors+1;
-		idx[t++] = (rings-3)*sectors + i+1;
-		idx[t++] = (rings-3)*sectors + i;
-	}
 }
 
 // Modified from http://www.gamedev.net/topic/537269-procedural-sphere-creation/

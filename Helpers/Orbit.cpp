@@ -41,10 +41,10 @@
 #define PRECISION 1e-14
 
 void Orbit::convertOrbElsToPos(Point3d& v, double* cosfs, double* sinfs, double f) {
-    double radius = axis * (1 - e * e) / (1 + e * cosfs[(size_t)f]);
+    double radius = axis * (1. - e * e) / (1. + e * cosfs[(size_t)f]);
     v.x = radius * cosfs[(size_t)f];
     v.y = radius * sinfs[(size_t)f];
-    v.z = 0;
+    v.z = 0.;
 }
 
 void Orbit::calculatePosition(double* cosfs, double* sinfs) {

@@ -1,6 +1,6 @@
 /*!
- @file SwiftReader.cpp
- @brief Reads in SWIFT files. Called by OrbitalAnimationDriver. Does not depend on any other classes.
+ @file MercuryReader.cpp
+ @brief Reads in output from Mercury. Called by OrbitalAnimationDriver. Does not depend on any other classes.
  Parsing is done using QRegExp.
 
  @section LICENSE
@@ -34,16 +34,13 @@
  https://subversion.assembla.com/svn/rob_douglas_sandbox/trunk/license.txt)
 */
 
-#include "SwiftReader.h"
+#include "MercuryReader.h"
 
 #define SEPARATOR "\\s*"
 #define DECIMAL_FIELD_REXP "([0-9\\.eE\\-\\+]*)"
 
-SwiftReader::SwiftReader(QString filename, QString dataType)
+MercuryReader::MercuryReader(QString filename, QString dataType)
     : lineParser(
-        SEPARATOR DECIMAL_FIELD_REXP
-        SEPARATOR DECIMAL_FIELD_REXP
-        SEPARATOR DECIMAL_FIELD_REXP
         SEPARATOR DECIMAL_FIELD_REXP
         SEPARATOR DECIMAL_FIELD_REXP
         SEPARATOR DECIMAL_FIELD_REXP
@@ -59,17 +56,17 @@ SwiftReader::SwiftReader(QString filename, QString dataType)
         {
             QTextStream stream(&file);
             if(QString::compare(dataType,QString("xyz"),Qt::CaseInsensitive) == 0){
-                readXYZ(stream);
+                readXYZ(stream, 0);
             }
             else{
-                readOsc(stream);
+                readOsc(stream, 0);
             }
             file.close();
         }
     }
 }
 
-void SwiftReader::readOsc(QTextStream& stream)
+void MercuryReader::readOsc(QTextStream& stream, int ID)
 {
     QString line;
     int lineNum = 0;
@@ -89,20 +86,19 @@ void SwiftReader::readOsc(QTextStream& stream)
                 throw std::runtime_error(os.str()); \
                 }
             d.time = decimals.at(1).toDouble(&ok); HANDLE_ERROR(1);
-            d.particleID = decimals.at(2).toDouble(&ok); HANDLE_ERROR(2);
-            d.axis = decimals.at(3).toDouble(&ok); HANDLE_ERROR(3);
-            d.e = decimals.at(4).toDouble(&ok); HANDLE_ERROR(4);
-            d.i = decimals.at(5).toDouble(&ok); HANDLE_ERROR(5);
-            d.Omega = decimals.at(6).toDouble(&ok); HANDLE_ERROR(6);
-            d.w = decimals.at(7).toDouble(&ok); HANDLE_ERROR(7);
-            d.f = decimals.at(8).toDouble(&ok); HANDLE_ERROR(8);
+            d.axis = decimals.at(2).toDouble(&ok); HANDLE_ERROR(3);
+            d.e = decimals.at(3).toDouble(&ok); HANDLE_ERROR(4);
+            d.i = decimals.at(4).toDouble(&ok); HANDLE_ERROR(5);
+            d.Omega = decimals.at(5).toDouble(&ok); HANDLE_ERROR(6);
+            d.w = decimals.at(6).toDouble(&ok); HANDLE_ERROR(7);
+            d.f = decimals.at(7).toDouble(&ok); HANDLE_ERROR(10);
             d.hasOrbEls = true;
-            data[d.particleID].push_back(d);
+            data[ID].push_back(d);
         }
     }
 }
 
-void SwiftReader::readXYZ(QTextStream& stream)
+void MercuryReader::readXYZ(QTextStream& stream, int ID)
 {
     QString line;
     int lineNum = 0;
@@ -122,18 +118,19 @@ void SwiftReader::readXYZ(QTextStream& stream)
                 throw std::runtime_error(os.str()); \
                 }
             d.time = decimals.at(1).toDouble(&ok); HANDLE_ERROR(1);
-            d.particleID = decimals.at(2).toDouble(&ok); HANDLE_ERROR(2);
-            d.r[0] = decimals.at(3).toDouble(&ok); HANDLE_ERROR(3);
-            d.r[1] = decimals.at(4).toDouble(&ok); HANDLE_ERROR(4);
-            d.r[2] = decimals.at(5).toDouble(&ok); HANDLE_ERROR(5);
-            d.v[0] = decimals.at(6).toDouble(&ok); HANDLE_ERROR(6);
-            d.v[1] = decimals.at(7).toDouble(&ok); HANDLE_ERROR(7);
-            d.v[2] = decimals.at(8).toDouble(&ok); HANDLE_ERROR(8);
+            d.r[0] = decimals.at(2).toDouble(&ok); HANDLE_ERROR(3);
+            d.r[1] = decimals.at(3).toDouble(&ok); HANDLE_ERROR(4);
+            d.r[2] = decimals.at(4).toDouble(&ok); HANDLE_ERROR(5);
+            d.v[0] = decimals.at(5).toDouble(&ok); HANDLE_ERROR(6);
+            d.v[1] = decimals.at(6).toDouble(&ok); HANDLE_ERROR(7);
+            d.v[2] = decimals.at(7).toDouble(&ok); HANDLE_ERROR(8);
             d.hasOrbEls = false;
             d.posInPlane.x = d.r[0];
             d.posInPlane.y = d.r[1];
             d.posInPlane.z = d.r[2];
-            data[d.particleID].push_back(d);
+            data[ID].push_back(d);
         }
     }
 }
+
+

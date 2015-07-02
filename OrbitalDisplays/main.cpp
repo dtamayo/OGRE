@@ -67,16 +67,19 @@ int main(int argc, char *argv[])
     parser.addOption(intOption);
     QCommandLineOption typeOption(QStringList() << "t" << "type", QCoreApplication::translate("main", "Format of input file (osc or xyz). Default is osc."), QCoreApplication::translate("main", "type"), "osc");
     parser.addOption(typeOption);
+    QCommandLineOption drawFullOrbit(QStringList() << "o" << "orbit", QCoreApplication::translate("main", "Flag for drawing osculating orbit."));
+    parser.addOption(drawFullOrbit);
 
     parser.process(a);
 
     QString integrator = parser.value(intOption);
 
     if(QString::compare(integrator, QString("rebound"), Qt::CaseInsensitive) != 0 && \
+            QString::compare(integrator, QString("mercury"), Qt::CaseInsensitive) != 0 && \
             QString::compare(integrator, QString("swift"), Qt::CaseInsensitive) != 0 && \
             QString::compare(integrator, QString("di"), Qt::CaseInsensitive) != 0)
     {
-        fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "Error: integrator not supported. Must be rebound, swift, or dI")));
+        fprintf(stderr, "%s\n", qPrintable(QCoreApplication::translate("main", "Error: integrator not supported. Must be rebound, mercury, swift, or dI")));
         parser.showHelp(1);
     }
 
@@ -91,7 +94,7 @@ int main(int argc, char *argv[])
 
     QString filename = parser.value(fileOption);
 
-    Disp::MainWindow window(filename, integrator, type);
+    Disp::MainWindow window(filename, integrator, type, parser.isSet(drawFullOrbit));
 
     window.show();
 

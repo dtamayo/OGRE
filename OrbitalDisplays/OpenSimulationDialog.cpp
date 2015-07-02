@@ -40,6 +40,7 @@ OpenSimulationDialog::OpenSimulationDialog() : QDialog() {
     QFormLayout* form = new QFormLayout;
     selectFileType = new QComboBox;
     selectFileType->addItem("Rebound",0);
+    selectFileType->addItem("MERCURY",0);
     selectFileType->addItem("SWIFT", 0);
     selectFileType->addItem("dI", 0);
     selectDataType = new QComboBox;

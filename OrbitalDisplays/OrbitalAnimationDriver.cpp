@@ -93,16 +93,20 @@ namespace Disp
 
         @sa @ref Disp::dIFile::reboundFile()
       */
-    void OrbitalAnimationDriver::setSimulationData(QString filename, QString fileType, QString dataType, bool b) {
+    void OrbitalAnimationDriver::setSimulationData(QString filename, QString fileType, QString dataType, bool drawFullOrbit) {
         orbitalAnimator->setLoading(true);
         orbitalAnimator->updateGL(); // makes display show the "Loading" message after the loading flag is set on previous line
-        orbitalAnimator->setFullOrbit(b);
+        orbitalAnimator->setFullOrbit(drawFullOrbit);
         if (QString::compare(fileType,QString("Rebound"),Qt::CaseInsensitive) == 0) {
             ReboundReader reboundFile(filename, dataType);
             orbitalAnimator->updateSimulationCache(reboundFile.getData());
         }
+        else if (QString::compare(fileType,QString("MERCURY"),Qt::CaseInsensitive) == 0) {
+            MercuryReader mercuryFile(filename, dataType);
+            orbitalAnimator->updateSimulationCache(mercuryFile.getData());
+        }
         else if (QString::compare(fileType,QString("SWIFT"),Qt::CaseInsensitive) == 0) {
-            SwiftReader swiftFile(filename);
+            SwiftReader swiftFile(filename, dataType);
             orbitalAnimator->updateSimulationCache(swiftFile.getData());
         }
         else if (QString::compare(fileType,QString("dI"),Qt::CaseInsensitive) == 0) {

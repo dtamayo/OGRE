@@ -55,13 +55,13 @@
 inline double degToRads(double deg) { return deg * M_PI / 180.; }
 inline double radsToDeg(double rads) { return rads * 180. / M_PI; }
 
-void drawsphere(int sectors, int rings, int radius);
+void drawsphere(int sectors, int rings, double radius);
 
 class Sphere
 {
 public:
-	Sphere(int sectors, int rings, int radius);
-	void updateRadius(int radius);
+    Sphere(int sectors, int rings, double radius);
+    void updateRadius(double radius);
 	void draw();
 
 private:
@@ -70,7 +70,7 @@ private:
 	int ntri;
 	int sectors;
 	int rings;
-	int radius;
+    double radius;
 };
 
 class Cone

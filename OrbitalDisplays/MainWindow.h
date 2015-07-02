@@ -66,12 +66,12 @@ namespace Disp
     {
     Q_OBJECT
     public:
-        MainWindow(QString filename, QString integrator, QString type);
+        MainWindow(QString filename, QString integrator, QString type, bool drawFullOrbit);
         void setupUI();
 
     private slots:
         void openSimulationDialog();
-        void openSimulation(QString filename, QString filetype, QString datatype, bool fullorbit);
+        void openSimulation(QString filename, QString filetype, QString datatype, bool drawFullOrbit);
         void openEquatorial();
         void openEcliptic();
         void removeSimulation();

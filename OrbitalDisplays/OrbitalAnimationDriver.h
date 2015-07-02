@@ -44,6 +44,7 @@
 #include "OrbitalReaders/DIReader.h"
 #include "OrbitalReaders/OrbitalDataCSVReader.h"
 #include "OrbitalReaders/SwiftReader.h"
+#include "OrbitalReaders/MercuryReader.h"
 #include "OrbitalReaders/ReboundReader.h"
 #include "Settings.h"
 #include "SettingsDialog.h"
@@ -90,7 +91,7 @@ namespace Disp
         QWidget* setupUI();
         void layoutControls();
         void makeConnections();
-        void setSimulationData(QString filename, QString fileType, QString dataType, bool b);
+        void setSimulationData(QString filename, QString fileType, QString dataType, bool drawFullOrbit);
         void setEquatorialData(QString equatorialFName);
         void setEclipticData(QString eclipticFName);
         void clearEquatorialData();

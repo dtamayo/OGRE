@@ -61,7 +61,7 @@ namespace Disp
         , xrotation(0.)
         , yrotation(20.)
         , zrotation(-15.)
-        , centralBody(20, 20, 0)
+        , centralBody(20, 20, 0.)
         , loading(false)
         , recording(false)
         , pictureNumber(0)
@@ -84,7 +84,7 @@ namespace Disp
         setMouseTracking(true);
         connect(&settings, SIGNAL(changed()), this, SLOT(updateGL()));
 
-        //orbitalAnimator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); // Expanding fills up as much space as available
+        this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); // Expanding fills up as much space as available
 
         /*QSizePolicy spol (QSizePolicy::Fixed, QSizePolicy::Fixed); // sets it to value you give
         spol.setHeightForWidth(true);
@@ -141,7 +141,7 @@ namespace Disp
 
         glEnable(GL_LINE_SMOOTH);      
         glHint(GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
-        glLineWidth(8.5);
+        glLineWidth(2.5);
     }
 
     /*! @brief Resizes the OpenGL viewport
@@ -323,15 +323,15 @@ namespace Disp
             glPushMatrix();
 
             if ((size_t)currentIndex < (itr->second).size()) {
+                glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
+                glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
+                glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
                 if(fillOrbits){
                     glColor4f(settings.orbitalPlaneColor().red() / 255.,
                           settings.orbitalPlaneColor().green() / 255.,
                           settings.orbitalPlaneColor().blue() / 255.,
                           settings.orbitalPlaneColor().alpha() / 255.);
 
-                    glRotatef((itr->second)[currentIndex].Omega, 0, 0, 1);
-                    glRotatef((itr->second)[currentIndex].i, 1, 0, 0);
-                    glRotatef((itr->second)[currentIndex].w, 0, 0, 1);
                     glBegin(GL_POLYGON);
                     for (int f = 0; f < 360; ++f) {
                         glVertex3f((itr->second)[currentIndex].orbitCoords[f].x,
@@ -440,8 +440,8 @@ namespace Disp
         for (OrbitData::iterator itr = orbitData.begin(); itr != orbitData.end(); itr++) {
             for (size_t i = 0; i < (itr->second).size(); i++) {
                 if ((itr->second)[i].hasOrbEls){
-                    if (!drawFullOrbit) (itr->second)[i].calculatePosition(cosfs, sinfs);
-                    else (itr->second)[i].calculateOrbit(cosfs, sinfs);
+                    if (drawParticles) (itr->second)[i].calculatePosition(cosfs, sinfs);
+                    if (drawFullOrbit) (itr->second)[i].calculateOrbit(cosfs, sinfs);
                 }
                 if (nothingLoaded()) {
                     minimum = findMin((itr->second)[i].posInPlane, minimum);
